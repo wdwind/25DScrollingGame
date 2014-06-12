@@ -412,29 +412,38 @@ bool Mesh::loadMesh(int NbVertX, int NbVertY, float qurdSize){
 	int ind1 = 0;
 	int ind2 = 0;
 	int ind3 = 0;
+
+	float x;
+	float y;
+	//float z;
+
 	for (int i = 0; i < NbVertY; i++)
 	{
 		for (int j = 0; j < NbVertX; j++)
 		{
-			SurfaceVertices3f[ind1] = j*qurdSize;
-			ind1++;
-
-			SurfaceVertices3f[ind1] = i*qurdSize;
-			ind1++;
 
 			//float z = sin(j)*sin(i);
-			float z = sin(j)*sin(i);
+			z = sin(j);
 			if (j == NbVertX - 1 || j == 0)
 			{
 				z = 0;
 			}
-			
-			SurfaceVertices3f[ind1] = z*qurdSize;
+			z *= qurdSize;
+
+			x = j*qurdSize;
+			SurfaceVertices3f[ind1] = x;
 			ind1++;
 
-			texcords2f[ind2] = j*qurdSize;
+			y = i*qurdSize;
+			SurfaceVertices3f[ind1] = y;
+			ind1++;
+
+			SurfaceVertices3f[ind1] = z;
+			ind1++;
+
+			texcords2f[ind2] = x;
 			ind2++;
-			texcords2f[ind2] = i*qurdSize;
+			texcords2f[ind2] = y;
 			ind2++;
 
 			/*if (z > 0.5)
