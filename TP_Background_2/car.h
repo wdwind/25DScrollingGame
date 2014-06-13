@@ -185,6 +185,7 @@ public:
 			}
 
 			bullets[i].drawBullet();
+			bullets[i].drawCurrentPos();
 		}
 	}
 

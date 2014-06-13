@@ -54,6 +54,11 @@ public:
 			{
 				glTranslatef(speedX, 0, 0);
 				speedX += 0.05;
+
+				if (speedX > 6)
+				{
+					outOfRange = true;
+				}
 			}
 			//glTranslatef(0, 0, .23);
 			gluSphere(sphere, .1, 20, 20);
@@ -64,9 +69,12 @@ public:
 	}
 
 	Vec3Df getCurrentPos(){
-		Vec3Df cp;
-		cp = Vec3Df(origin[0] * cos(theta*PI / 180) + origin[1] * sin(theta*PI / 180), -origin[0] * sin(theta*PI / 180) + origin[1] * cos(theta*PI / 180), origin[2]);
-		cp = cp + translate;
+		Vec3Df cp = origin;
+		//cp = Vec3Df(origin[0] * cos(theta*PI / 180) + origin[1] * sin(theta*PI / 180), -origin[0] * sin(theta*PI / 180) + origin[1] * cos(theta*PI / 180), origin[2]);
+		if (shot)
+		{
+			cp = cp + Vec3Df(speedX * cos(-theta*PI / 180), speedX * sin(-theta*PI / 180), 0);
+		}
 
 		return cp;
 	}
@@ -75,14 +83,13 @@ public:
 		glBegin(GL_LINES);
 
 		glColor3f(1, 1, 0);
-		//glTranslatef(SurfaceVertices3f[i], SurfaceVertices3f[i+1], SurfaceVertices3f[i+2]);
 		glVertex3f(0, 0, 0);
 		Vec3Df cp = getCurrentPos();
 		glVertex3f(cp[0], cp[1], cp[2]);
 
 		glEnd();
 
-		cout << cp[0] << " " << cp[1] << " " << cp[2] << endl;
+		//cout << cp[0] << " " << cp[1] << " " << cp[2] << endl;
 	}
 
 	void drawShot(){
