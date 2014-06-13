@@ -284,6 +284,23 @@ void collisionDetect(Vec3Df start){
 	
 }
 
+void collisionDetect2(){
+	for (int i = 0; i < car.bullets.size(); i++)
+	{
+		for (int j = 0; j < enemies.size(); j++)
+		{
+			Vec3Df bPos = car.bullets[i].getCurrentPos();
+			Vec3Df ePos = enemies[j].getCurrentPos();
+
+			if ((bPos - ePos).getLength() <= enemies[j].maxDist)
+			{
+				car.bullets.erase(car.bullets.begin() + i);
+				enemies.erase(enemies.begin() + j);
+			}
+		}
+	}
+}
+
 /**
 * Animation
 */
@@ -497,6 +514,8 @@ void dessinerOther(){
 
 	for (int i = 0; i < enemies.size(); i++)
 	{
+		enemies[i].move();
+		enemies[i].drawCurrentPos();
 		glPushMatrix();
 			glTranslatef(enemies[i].translate[0], enemies[i].translate[1], enemies[i].translate[2]);
 			enemies[i].drawWithColors();
@@ -731,6 +750,8 @@ void idle()
 
 	if (updateAlways)
 		computeLighting();
+
+	collisionDetect2();
 
 	glutPostRedisplay();
 	animate();
