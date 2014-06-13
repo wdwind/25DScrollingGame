@@ -18,7 +18,6 @@ using namespace std;
 // Functions
 void computeLighting();
 void dealWithUserInput(int x, int y);
-void drawCar();
 void initTexture();
 void keyboard(unsigned char key, int x, int y);
 void display(void);
@@ -29,14 +28,12 @@ unsigned int W_fen = 800;  // largeur fenetre
 unsigned int H_fen = 800;  // hauteur fenetre
 
 std::vector<GLuint> Texture;
-//Mesh MyMesh, MyMesh2, enemy;
 std::vector<Mesh> meshes;
-//std::vector<std::vector<Vec3Df>> lightings;
-//std::vector<Vec3Df> translates;
-
 std::vector<Enemy> enemies;
-//std::vector<std::vector<Vec3Df>> lightingsForEnemies;
-//std::vector<Vec3Df> translatesForEnemies;
+Car car;
+
+// Test
+GLUquadricObj *sphere = NULL;
 
 //std::vector<Bullet> bullets;
 
@@ -265,7 +262,7 @@ void collisionDetect(Vec3Df start){
 	glPushMatrix();
 	glColor3f(1, 0, 0);
 	glVertex3f(0, 0, 0);
-	glVertex3f(0.5 + PositionBullet[0], 0.5 + PositionBullet[1], 0.5 + PositionBullet[2]);
+	glVertex3f(0.5 + car.PositionBullet[0], 0.5 + car.PositionBullet[1], 0.5 + car.PositionBullet[2]);
 	glPopMatrix();
 	glEnd();
 
@@ -277,7 +274,7 @@ void collisionDetect(Vec3Df start){
 		Vec3Df t2 = meshes[enemyIndex].vertices[meshes[enemyIndex].triangles[i].v[1]].p;
 		Vec3Df t3 = meshes[enemyIndex].vertices[meshes[enemyIndex].triangles[i].v[2]].p;
 		RealTriangle rt = RealTriangle(t1, t2, t3);
-		t = intersect3D_RayTriangle(Vec3Df(PositionBullet[0], PositionBullet[1], PositionBullet[2]), Vec3Df(PositionBullet[0] + 10, PositionBullet[1], PositionBullet[2]), rt);
+		t = intersect3D_RayTriangle(Vec3Df(car.PositionBullet[0], car.PositionBullet[1], car.PositionBullet[2]), Vec3Df(car.PositionBullet[0] + 10, car.PositionBullet[1], car.PositionBullet[2]), rt);
 
 		if (t==1)
 			cout << t << endl;
@@ -294,25 +291,25 @@ void animate()
 	Vx2 -= backgroundSpeed;
 
 	if (temp3){
-		rBall += incrementOfrball;
+		car.rBall += car.incrementOfrball;
 	}
 
 	if (temp1) {
 		int t = 1;
 		while (t < 100) {
 			t += 1;
-			angleUpper += .001;
-			angleFore += 0.05;
-			angleHand -= .005;
+			car.angleUpper += .001;
+			car.angleFore += 0.05;
+			car.angleHand -= .005;
 		}
 	}
 
 	if (temp2) {
 		glPushMatrix();
 		glTranslatef(0, 0, 1.5);
-		angleFore += incrementAngle;
-		if (angleFore >= 100 || angleFore <= 30){
-			incrementAngle = -incrementAngle;
+		car.angleFore += car.incrementAngle;
+		if (car.angleFore >= 100 || car.angleFore <= 30){
+			car.incrementAngle = -car.incrementAngle;
 		}
 		glPopMatrix();
 	}
@@ -343,6 +340,10 @@ void init(){
 	enemy.translate = Vec3Df(4, 0.5, 1);
 	enemies.push_back(enemy);
 
+	sphere = gluNewQuadric();
+	gluQuadricDrawStyle(sphere, GLU_FILL);
+	gluQuadricTexture(sphere, GL_TRUE);
+	gluQuadricNormals(sphere, GLU_SMOOTH);
 
 	//MeshMaterial.resize(MyMesh.vertices.size());
 	//for (int i=0; i<MyMesh.vertices.size();++i)
@@ -368,6 +369,19 @@ void dessinerBackground()
 		glTranslatef(LightPos[0][0], LightPos[0][1], LightPos[0][2]);
 		glutSolidSphere(.5, 50, 50);
 	glPopMatrix();
+
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, Texture[1]);
+		gluSphere(sphere, 5.0, 20, 20);
+	glBindTexture(GL_TEXTURE_2D, 2);
+	glDisable(GL_TEXTURE_2D);
+
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, Texture[0]);
+		glColor3f(1, 1, 1);
+		gluSphere(sphere, .5, 20, 20);
+	glBindTexture(GL_TEXTURE_2D, 2);
+	glDisable(GL_TEXTURE_2D);
 
 	// Draw distant view
 	glPushMatrix();
@@ -488,14 +502,14 @@ void dessinerOther(){
 	}
 
 	if (drawC)
-		drawCar();
+		car.drawCar();
 
 	if (shot){
-		if (PositionBullet[0] < 6){
-			PositionBullet[0] += 0.03;
+		if (car.PositionBullet[0] < 6){
+			car.PositionBullet[0] += 0.03;
 		}
-		else if (PositionBullet[0] >= 6){
-			PositionBullet[0] = 0.03;
+		else if (car.PositionBullet[0] >= 6){
+			car.PositionBullet[0] = 0.03;
 		}
 	}
 
@@ -614,10 +628,10 @@ void keyboard(unsigned char key, int x, int y)
 		drawC = true;
 		break;
 	case '.':
-		canonClock();
+		car.canonClock();
 		break;
 	case ',':
-		canonCounter();
+		car.canonCounter();
 		break;
 	case 'v':
 		temp1 = true;
