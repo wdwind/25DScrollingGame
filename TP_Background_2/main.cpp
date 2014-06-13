@@ -31,7 +31,7 @@ unsigned int H_fen = 800;  // hauteur fenetre
 std::vector<GLuint> Texture;
 std::vector<Mesh> meshes;
 std::vector<Enemy> enemies;
-Car car;
+Car car = Car();
 //Bullet b;
 
 // Test
@@ -293,10 +293,10 @@ void animate()
 	Vx2 -= backgroundSpeed;
 
 	if (temp3){
-		car.rBall += car.incrementOfrball;
+		//car.rBall += car.incrementOfrball;
 	}
 
-	if (temp1) {
+	/*if (temp1) {
 		int t = 1;
 		while (t < 100) {
 			t += 1;
@@ -314,7 +314,7 @@ void animate()
 			car.incrementAngle = -car.incrementAngle;
 		}
 		glPopMatrix();
-	}
+	}*/
 
 	//collisionDetect();
 }
@@ -514,26 +514,26 @@ void dessinerOther(){
 	if (drawC)
 		car.drawCar();
 
-	if (shot){
-		if (car.PositionBullet[0] < 6){
-			car.PositionBullet[0] += 0.003;
-			//car.temp1.drawCurrentPos();
+	//if (shot){
+	//	if (car.PositionBullet[0] < 6){
+	//		car.PositionBullet[0] += 0.003;
+	//		//car.temp1.drawCurrentPos();
 
-			/*glPushMatrix();
-			glTranslatef(car.PositionBullet[0], 0, 0);
-			b.drawBullet();
-			glPopMatrix();*/
-		}
-		else if (car.PositionBullet[0] >= 6){
-			car.PositionBullet[0] = 0.03;
-			//car.temp1.drawCurrentPos();
+	//		/*glPushMatrix();
+	//		glTranslatef(car.PositionBullet[0], 0, 0);
+	//		b.drawBullet();
+	//		glPopMatrix();*/
+	//	}
+	//	else if (car.PositionBullet[0] >= 6){
+	//		car.PositionBullet[0] = 0.03;
+	//		//car.temp1.drawCurrentPos();
 
-			/*glPushMatrix();
-			glTranslatef(car.PositionBullet[0], 0, 0);
-			b.drawBullet();
-			glPopMatrix();*/
-		}
-	}
+	//		/*glPushMatrix();
+	//		glTranslatef(car.PositionBullet[0], 0, 0);
+	//		b.drawBullet();
+	//		glPopMatrix();*/
+	//	}
+	//}
 
 	if (drawB)
 		collisionDetect(Vec3Df(0, 0, 1));
@@ -663,6 +663,7 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 	case 'j':
 		shot = true;
+		car.shotBullet();
 		break;
 	case 'p':
 		printVector(mv, 16);

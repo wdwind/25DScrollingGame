@@ -20,14 +20,9 @@ class Car{
 public:
 	Car(){
 		PositionBullet = { (float)0.03, (float)0.1, (float)0.23 };
-		
 	};
 
-	float ballX = 0.1f;
-	float ballY = 0.1f;
-	float ballZ = 0.5f;
 	GLfloat rCanon = 0.0f;
-	GLfloat rBall = 0.0f;
 
 	std::vector<float> PositionBullet;
 	 //= { (float)0.03, (float)0.1, (float)0.23 };
@@ -37,38 +32,46 @@ public:
 
 	std::vector<Bullet> bullets;
 	
-
-	GLfloat firstVertexOfTri = 0.0;
-	GLfloat incrementOfVertex = .001;
-	GLfloat angleUpper = 0;
-	GLfloat angleFore = -30;
-	GLfloat angleHand = -30;
-	GLfloat incrementAngle = .05;
-	GLfloat incrementOfrball = 0.3f;
+	//GLfloat firstVertexOfTri = 0.0;
+	//GLfloat incrementOfVertex = .001;
+	
+	//GLfloat angleUpper = 0;
+	//GLfloat angleFore = -30;
+	//GLfloat angleHand = -30;
+	//GLfloat incrementAngle = .05;
+	//GLfloat incrementOfrball = 0.3f;
 
 	void drawBall(void) {
+		float ballX = 0.1f;
+		float ballY = 0.1f;
+		float ballZ = 0.5f;
+
+		GLfloat rBall = 0.0f;
 
 		glColor3f(0.0, 1.0, 0.0); //set ball colour
+
 		glPushMatrix();
-		glTranslatef(ballX, ballY, ballZ); //moving it toward the screen a bit on creation
-		//glRotatef(ballX,ballX,ballY,ballZ);
-		glRotatef(rBall, 0, 0, -1);
-		glutSolidSphere(0.2, 10, 10); //create ball.
+			glTranslatef(ballX, ballY, ballZ); //moving it toward the screen a bit on creation
+			glRotatef(rBall, 0, 0, -1);
+			glutSolidSphere(0.2, 10, 10); //create ball.
 		glPopMatrix();
+
 		glPushMatrix();
-		glTranslatef(ballX + .8, ballY, ballZ); //moving it toward the screen a bit on creation
-		glRotatef(rBall, 0, 0, -1);
-		glutSolidSphere(0.2, 10, 10); //
+			glTranslatef(ballX + .8, ballY, ballZ); //moving it toward the screen a bit on creation
+			glRotatef(rBall, 0, 0, -1);
+			glutSolidSphere(0.2, 10, 10); //
 		glPopMatrix();
+
 		glPushMatrix();
-		glTranslatef(ballX, ballY, ballZ + .5); //moving it toward the screen a bit on creation
-		glRotatef(rBall, 0, 0, -1);
-		glutSolidSphere(0.2, 10, 10); //
+			glTranslatef(ballX, ballY, ballZ + .5); //moving it toward the screen a bit on creation
+			glRotatef(rBall, 0, 0, -1);
+			glutSolidSphere(0.2, 10, 10); //
 		glPopMatrix();
+
 		glPushMatrix();
-		glTranslatef(ballX + .8, ballY, ballZ + .5); //moving it toward the screen a bit on creation
-		glRotatef(rBall, 0, 0, -1);
-		glutSolidSphere(0.2, 10, 10); //
+			glTranslatef(ballX + .8, ballY, ballZ + .5); //moving it toward the screen a bit on creation
+			glRotatef(rBall, 0, 0, -1);
+			glutSolidSphere(0.2, 10, 10); //
 		glPopMatrix();
 
 	}
@@ -79,12 +82,13 @@ public:
 		//2) make sure the orientation of the vertices is positive (counterclock wise)
 		//3) What happens if the order is inversed?
 		glColor3f(1, 1, 0);
-		glNormal3f(1, 1, 1);
+		glNormal3f(0, 0, -1);
+
 		glBegin(GL_QUADS);
-		glVertex3f(0, 0, .5);
-		glVertex3f(0, .5, .5);
-		glVertex3f(.5, .5, .5);
-		glVertex3f(.5, 0, .5);
+			glVertex3f(0, 0, .5);
+			glVertex3f(0, .5, .5);
+			glVertex3f(.5, .5, .5);
+			glVertex3f(.5, 0, .5);
 		glEnd();
 
 	}
@@ -98,97 +102,123 @@ public:
 		//the top of a stack.
 		//glPopMatrix pops the top matrix on the stack
 		glPushMatrix();
-		drawUnitFace();
-		glRotatef(180, 0, -1, 0);
-		glTranslatef(-.5, 0, -1.5);
-		drawUnitFace();
+			drawUnitFace();
+			glRotatef(180, 0, -1, 0);
+			glTranslatef(-.5, 0, -1.5);
+			drawUnitFace();
 		glPopMatrix();
+
 		glPushMatrix();
-		glRotatef(-90, 0, -1, 0);
-		glTranslatef(-1, 0, -.5);
-		drawUnitFace();
+			glRotatef(-90, 0, -1, 0);
+			glTranslatef(-1, 0, -.5);
+			drawUnitFace();
 		glPopMatrix();
+
 		glPushMatrix();
-		glRotatef(90, 0, -1, 0);
-		glTranslatef(.5, 0, -1);
-		drawUnitFace();
+			glRotatef(90, 0, -1, 0);
+			glTranslatef(.5, 0, -1);
+			drawUnitFace();
 		glPopMatrix();
+
 		glPushMatrix();
-		glRotatef(-90, -1, 0, 0);
-		glTranslatef(0, .5, -1);
-		drawUnitFace();
+			glRotatef(-90, -1, 0, 0);
+			glTranslatef(0, .5, -1);
+			drawUnitFace();
 		glPopMatrix();
-		glRotatef(90, -1, 0, 0);
-		glTranslatef(0, -1, -.5);
-		drawUnitFace();
+
+		//glPushMatrix();
+			glRotatef(90, -1, 0, 0);
+			glTranslatef(0, -1, -.5);
+			drawUnitFace();
 		glPopMatrix();
 	}
 
 	void drawBullet(){
 		glColor3f(0, 0, 1);
+
 		glPushMatrix();
-		glRotatef(rCanon, 0, 0, -1);
-		glTranslatef(PositionBullet[0], PositionBullet[1], PositionBullet[2]);
-		glutSolidSphere(.05, 50, 50);
+			glRotatef(rCanon, 0, 0, -1);
+			glTranslatef(PositionBullet[0], PositionBullet[1], PositionBullet[2]);
+			glutSolidSphere(.05, 50, 50);
 		glPopMatrix();
+	}
+
+	void shotBullet(){
+		if (bullets.empty())
+		{
+			bullets.push_back(Bullet());
+			bullets.back().origin = Vec3Df(PositionBullet[0] + 0.5, PositionBullet[1] + 0.5, PositionBullet[2] + 0.5);
+			bullets.back().theta = rCanon;
+		}
+
+		//bullets.end()->speed = 0.05;
+		bullets.back().origin = Vec3Df(PositionBullet[0] + 0.5, PositionBullet[1] + 0.5, PositionBullet[2] + 0.5);
+		bullets.back().theta = rCanon;
+		bullets.back().shot = true;
+
+		bullets.push_back(Bullet());
+		bullets.back().origin = Vec3Df(PositionBullet[0] + 0.5, PositionBullet[1] + 0.5, PositionBullet[2] + 0.5);
+		bullets.back().theta = rCanon;
+		bullets.back().drawBullet();
 	}
 
 	void drawBullet2(){
 		if (bullets.empty())
 		{
 			bullets.push_back(Bullet());
+			bullets.back().origin = Vec3Df(PositionBullet[0] + 0.5, PositionBullet[1] + 0.5, PositionBullet[2] + 0.5);
+			bullets.back().theta = rCanon;
 		}
 
-		bullets.end()->shot = true;
+		//bullets.back().drawBullet();
 
-		bullets.push_back(Bullet());
+		for (int i = 0; i < bullets.size(); i++)
+		{
+			if (bullets[i].outOfRange)
+			{
+				bullets.erase(bullets.begin() + i);
+			}
 
-		//glColor3f(0, 0, 1);
+			if (!bullets[i].shot)
+			{
+				bullets[i].theta = rCanon;
+			}
 
-		glPushMatrix();
-		glRotatef(rCanon, 0, 0, -1);
-		glTranslatef(PositionBullet[0], PositionBullet[1], PositionBullet[2]);
-		//glutSolidSphere(.05, 50, 50);
-		
-		//temp1.drawBullet();
-		
-		glPopMatrix();
+			bullets[i].drawBullet();
+		}
 	}
 
 	void drawCar()
 	{
-		//temp1.origin = Vec3Df(0.5, 0.5, 0.5);
-		
+		drawBullet2();
+
 		glPushMatrix(); //draw the car body
-		glScalef(2, 1, 1);
-		//glNormal3f(1, 2, 0);
-		drawUnitCube();
+			glScalef(2, 1, 1);
+			drawUnitCube();
+
 		glPushMatrix(); //draw the canon
-		glTranslatef(0.5, 0.5, 0.5);
+			glTranslatef(0.5, 0.5, 0.5);
 
 		//temp1.rotate = Vec3Df(0, 0, -1);
 		//temp1.translate = Vec3Df(PositionBullet[0], PositionBullet[1], PositionBullet[2]);
 		//temp1.theta = rCanon;
 
-		drawBullet();
+		//drawBullet2();
 		
-
-		glRotatef(rCanon, 0, 0, -1); //control the canon
-		glScalef(1.2, 0.3, 0.3);
-		//glNormal3f(1, 2, 0);
-		drawUnitCube();
-		drawBall(); //draw the wheels
+			glRotatef(rCanon, 0, 0, -1); //control the canon
+			glScalef(1.2, 0.3, 0.3);
+			//glNormal3f(1, 2, 0);
+			drawUnitCube();
+			drawBall(); //draw the wheels
 		
 		glPopMatrix();
 		glPopMatrix();
 
-		
 	}
 
 	void canonClock(){
 		if (rCanon >= -45 && rCanon < 0){
 			rCanon += 3;
-			
 		}
 	}
 
