@@ -11,6 +11,7 @@
 #include "car.h"
 #include "move.h"
 #include "utils.h"
+#include "enemy.h"
 
 using namespace std;
 
@@ -30,8 +31,14 @@ unsigned int H_fen = 800;  // hauteur fenetre
 std::vector<GLuint> Texture;
 //Mesh MyMesh, MyMesh2, enemy;
 std::vector<Mesh> meshes;
-std::vector<std::vector<Vec3Df>> lightings;
-std::vector<Vec3Df> translates;
+//std::vector<std::vector<Vec3Df>> lightings;
+//std::vector<Vec3Df> translates;
+
+std::vector<Enemy> enemies;
+//std::vector<std::vector<Vec3Df>> lightingsForEnemies;
+//std::vector<Vec3Df> translatesForEnemies;
+
+//std::vector<Bullet> bullets;
 
 int enemyIndex = 4;
 
@@ -77,18 +84,18 @@ int SelectedVertex=-1;
 //per vertex attributes, useful for materials - see later exercises
 //std::vector<Vec3Df> MeshMaterial;
 
-float lightPower = 5;
+float lightPower = 8;
 float s = 5;
 float showDot = true;
 
 
-int NbVertX = 8;
-int NbVertY = 3;
+int NbVertX = 9;
+int NbVertY = 5;
 float qurdSize = 1;
 
-float Vx1 = -2;
+float Vx1 = -3;
 float Vx2 = (NbVertX - 1)*qurdSize + Vx1;
-float threshold = -9;
+float threshold = -11;
 
 int showText = 2;
 int temp = showText;
@@ -96,7 +103,7 @@ bool drawN = false;
 bool drawC = false;
 float backgroundSpeed = 0.005;
 
-Vec3Df defaultLightPos = Vec3Df(2, 3, 2);
+Vec3Df defaultLightPos = Vec3Df(2, 3, 0);
 
 bool shot = false;
 bool temp1 = false;
@@ -227,47 +234,29 @@ Vec3Df computeLighting(Vec3Df & vertexPos, Vec3Df & normal, unsigned int light, 
 
 void computeLighting()
 {
-	for (int j = 0; j < lightings.size(); j++)
+	for (int j = 0; j < meshes.size(); j++)
 	{
-		std::vector<Vec3Df> *result = &(lightings[j]);
+		std::vector<Vec3Df> *result = &(meshes[j].lighting);
 
 		for (unsigned int i = 0; i<meshes[j].vertices.size(); ++i)
 		{
 			(*result)[i] = Vec3Df();
 			for (int l = 0; l < LightPos.size(); ++l)
-				(*result)[i] += computeLighting(meshes[j].vertices[i].p + translates[j], meshes[j].vertices[i].n, l, i);
+				(*result)[i] += computeLighting(meshes[j].vertices[i].p + meshes[j].translate, meshes[j].vertices[i].n, l, i);
 		}
 	}
 
-/*
-	std::vector<Vec3Df> *result = &lighting;
-
-
-	for (unsigned int i = 0; i<MyMesh.vertices.size(); ++i)
+	for (int j = 0; j < enemies.size(); j++)
 	{
-		(*result)[i] = Vec3Df();
-		for (int l = 0; l < LightPos.size(); ++l)
-			(*result)[i] += computeLighting(MyMesh.vertices[i].p + Vec3Df(Vx1, 0, 0), MyMesh.vertices[i].n, l, i);
+		std::vector<Vec3Df> *result = &(enemies[j].lighting);
+
+		for (unsigned int i = 0; i<enemies[j].vertices.size(); ++i)
+		{
+			(*result)[i] = Vec3Df();
+			for (int l = 0; l < LightPos.size(); ++l)
+				(*result)[i] += computeLighting(enemies[j].vertices[i].p + enemies[j].translate, enemies[j].vertices[i].n, l, i);
+		}
 	}
-
-	std::vector<Vec3Df> *result2 = &lighting2;
-
-
-	for (unsigned int i = 0; i<MyMesh2.vertices.size(); ++i)
-	{
-		(*result2)[i] = Vec3Df();
-		for (int l = 0; l < LightPos.size(); ++l)
-			(*result2)[i] += computeLighting(MyMesh2.vertices[i].p + Vec3Df(Vx2, 0, 0), MyMesh2.vertices[i].n, l, i);
-	}
-
-	std::vector<Vec3Df> *result3 = &lighting3;
-
-	for (unsigned int i = 0; i<enemy.vertices.size(); ++i)
-	{
-		(*result3)[i] = Vec3Df();
-		for (int l = 0; l < LightPos.size(); ++l)
-			(*result3)[i] += computeLighting(enemy.vertices[i].p, enemy.vertices[i].n, l, i);
-	}*/
 }
 
 
@@ -349,16 +338,12 @@ void animate()
 void init(){
 
 	//this function loads a mesh
-	Mesh enemy;
+	Enemy enemy;
 	enemy.loadMesh("enemy.obj");
-	meshes.push_back(enemy);
+	enemy.translate = Vec3Df(4, 0.5, 1);
+	enemies.push_back(enemy);
 
-	std::vector<Vec3Df> lighting3;
-	lighting3.resize(enemy.vertices.size());
 
-	lightings.push_back(lighting3);
-
-	translates.push_back(Vec3Df(4, 0.5, 1));
 	//MeshMaterial.resize(MyMesh.vertices.size());
 	//for (int i=0; i<MyMesh.vertices.size();++i)
 	//	MeshMaterial[i]=Vec3Df(0,0,0);
@@ -384,6 +369,21 @@ void dessinerBackground()
 		glutSolidSphere(.5, 50, 50);
 	glPopMatrix();
 
+	// Draw distant view
+	glPushMatrix();
+		glColor3f(0, 0, 1);
+		glTranslatef(-5, 0, -5);
+		glNormal3f(0, 0, 1);
+		//glScalef(40, 40, 40);
+
+		glBegin(GL_QUADS);
+			glVertex3f(0, 0, 0);
+			glVertex3f(12, 0, 0);
+			glVertex3f(12, 10, 0);
+			glVertex3f(0, 10, 0);
+		glEnd();
+	glPopMatrix();
+
 	switch( mode )
     {
     case ORIGINAL_LIGHTING:
@@ -400,12 +400,12 @@ void dessinerBackground()
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, Texture[showText]);
 
-			meshes[0].drawWithColors(lightings[0]);
+			meshes[0].drawWithColors();
 
 			glTranslatef(3,0,0);
-			meshes[1].drawWithColors(lightings[1]);
+			meshes[1].drawWithColors();
 
-			meshes[2].drawWithColors(lightings[2]);
+			meshes[2].drawWithColors();
 
 			glBindTexture(GL_TEXTURE_2D, 2);
 			glDisable(GL_TEXTURE_2D);
@@ -418,6 +418,10 @@ void dessinerBackground()
 		if (Vx1 < threshold)
 		{
 			Vx1 += 2 * (NbVertX - 1) * qurdSize;
+			//meshes[0].loadMesh(NbVertX, NbVertY, qurdSize);
+			Mesh temp;
+			temp.loadMesh(NbVertX, NbVertY, qurdSize);
+			meshes[0] = temp;
 		}
 
 		if (Vx2 < threshold)
@@ -426,15 +430,17 @@ void dessinerBackground()
 		}
 
 		glPushMatrix();
-			glTranslatef(Vx1, 0, 0);
-			meshes[0].drawWithColors(lightings[0]);
-			translates[0] = Vec3Df(Vx1, 0, 0);
+			glTranslatef(Vx1, 0, -2);
+			meshes[0].drawWithColors();
+			meshes[0].translate = Vec3Df(Vx1, 0, -2);
+			//translates[0] = Vec3Df(Vx1, 0, -2);
 		glPopMatrix();
 
 		glPushMatrix();
-			glTranslatef(Vx2, 0, 0);
-			meshes[1].drawWithColors(lightings[1]);
-			translates[1] = Vec3Df(Vx2, 0, 0);
+			glTranslatef(Vx2, 0, -2);
+			meshes[1].drawWithColors();
+			meshes[1].translate = Vec3Df(Vx2, 0, -2);
+			//translates[1] = Vec3Df(Vx2, 0, -2);
 		glPopMatrix();
 
 		glBindTexture(GL_TEXTURE_2D, 2);
@@ -446,16 +452,16 @@ void dessinerBackground()
 
 		glPushMatrix();
 			glTranslatef(Vx1, 0, -2);
-			meshes[2].drawWithColors(lightings[2]);
+			meshes[2].drawWithColors();
 			meshes[2].drawNormals();
-			translates[2] = Vec3Df(Vx1, 0, -2);
+			meshes[2].translate = Vec3Df(Vx1, 0, -2);
 		glPopMatrix();
 
 		glPushMatrix();
 			glTranslatef(Vx2, 0, -2);
-			meshes[3].drawWithColors(lightings[3]);
+			meshes[3].drawWithColors();
 			meshes[3].drawNormals();
-			translates[3] = Vec3Df(Vx2, 0, -2);
+			meshes[3].translate = Vec3Df(Vx2, 0, -2);
 		glPopMatrix();
 
 		glBindTexture(GL_TEXTURE_2D, 2);
@@ -466,18 +472,19 @@ void dessinerBackground()
 }
 
 void dessinerOther(){
-	glPushMatrix();
-	glTranslatef(translates[enemyIndex][0], translates[enemyIndex][1], translates[enemyIndex][2]);
-	//glRotatef(180, 0, 1, 0);
-	//glGetFloatv(GL_MODELVIEW_MATRIX, mv);
-	//enemy.draw();
-	meshes[enemyIndex].drawWithColors(lightings[enemyIndex]);
-	glPopMatrix();
 
+	for (int i = 0; i < enemies.size(); i++)
+	{
+		glPushMatrix();
+			glTranslatef(enemies[i].translate[0], enemies[i].translate[1], enemies[i].translate[2]);
+			enemies[i].drawWithColors();
+		glPopMatrix();
+	}
+	
 	if (drawN)
 	{
-		meshes[enemyIndex].drawNormals();
-		meshes[enemyIndex].drawSomeP();
+		enemies[0].drawNormals();
+		enemies[0].drawSomeP();
 	}
 
 	if (drawC)
@@ -485,7 +492,7 @@ void dessinerOther(){
 
 	if (shot){
 		if (PositionBullet[0] < 6){
-			PositionBullet[0] += 0.003;
+			PositionBullet[0] += 0.03;
 		}
 		else if (PositionBullet[0] >= 6){
 			PositionBullet[0] = 0.03;
@@ -644,13 +651,13 @@ void background(){
 	Mesh MyMesh3;
 	std::vector<Vec3Df> lighting3;
 
-	MyMesh3.loadRoad(NbVertX, 3, 1, 3);
+	MyMesh3.loadRoad(NbVertX, 3, qurdSize, 3);
 	lighting3.resize(MyMesh3.vertices.size());
 
 	Mesh MyMesh4;
 	std::vector<Vec3Df> lighting4;
 
-	MyMesh4.loadRoad(NbVertX, 3, 1, 3);
+	MyMesh4.loadRoad(NbVertX, 3, qurdSize, 3);
 	lighting4.resize(MyMesh4.vertices.size());
 
 	meshes.push_back(MyMesh);
@@ -658,15 +665,25 @@ void background(){
 	meshes.push_back(MyMesh3);
 	meshes.push_back(MyMesh4);
 
-	lightings.push_back(lighting);
-	lightings.push_back(lighting2);
-	lightings.push_back(lighting3);
-	lightings.push_back(lighting4);
+	meshes[0].lighting = lighting;
+	meshes[1].lighting = lighting2;
+	meshes[2].lighting = lighting3;
+	meshes[3].lighting = lighting4;
 
-	translates.push_back(Vec3Df(0, 0, 0));
-	translates.push_back(Vec3Df(0, 0, 0));
-	translates.push_back(Vec3Df(0, 0, 0));
-	translates.push_back(Vec3Df(0, 0, 0));
+	//meshes[0].translate = Vec3Df(0, 0, 0);
+	//meshes[1].translate = Vec3Df(0, 0, 0);
+	//meshes[2].translate = Vec3Df(0, 0, 0);
+	//meshes[3].translate = Vec3Df(0, 0, 0);
+
+	//lightings.push_back(lighting);
+	//lightings.push_back(lighting2);
+	//lightings.push_back(lighting3);
+	//lightings.push_back(lighting4);
+
+	//translates.push_back(Vec3Df(0, 0, 0));
+	//translates.push_back(Vec3Df(0, 0, 0));
+	//translates.push_back(Vec3Df(0, 0, 0));
+	//translates.push_back(Vec3Df(0, 0, 0));
 
 	//computeLighting();
 }

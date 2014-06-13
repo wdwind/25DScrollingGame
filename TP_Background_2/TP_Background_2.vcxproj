@@ -78,7 +78,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="bullet.h" />
     <ClInclude Include="car.h" />
+    <ClInclude Include="enemy.h" />
     <ClInclude Include="fileloader.h" />
     <ClInclude Include="loadppm.h" />
     <ClInclude Include="matrix.h" />

@@ -51,15 +51,25 @@ public:
     void draw();
     void drawSmooth();
 	void drawWithColors(const std::vector<Vec3Df> & colors);
+	void drawWithColors();
 	void drawNormals();
 	void drawSomeP(float* mv);
 	void drawSomeP();
     void computeBoundingCube();
 	int getClosestVertexIndex(const Vec3Df & origin, const Vec3Df & direction);
 
+	//void setLighting(std::vector<Vec3Df> & l) { lighting = l;};
+	//void setTranslate(Vec3Df t) { translate = t; };
+	//
+	//std::vector<Vec3Df> & getLighting() { return lighting;}
+	//Vec3Df getTranslate() { return translate; }
+
     //Bounding box information
     Vec3Df bbMinPos;
     float bbEdgeSize;
+
+	std::vector<Vec3Df> lighting;
+	Vec3Df translate = Vec3Df(0, 0, 0);
 };
 
 #endif // MESH_H

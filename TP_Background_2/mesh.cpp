@@ -121,6 +121,29 @@ void Mesh::drawWithColors(const std::vector<Vec3Df> & colors){
     glEnd();
 }
 
+void Mesh::drawWithColors(){
+	std::vector<Vec3Df> & colors = lighting;
+
+	glBegin(GL_TRIANGLES);
+
+	for (int i = 0; i<triangles.size(); ++i)
+	{
+		for (int v = 0; v < 3; v++){
+			const Vec3Df & color = colors[triangles[i].v[v]];
+			if (!texcords2f.empty())
+			{
+				glTexCoord2fv(&(texcords2f[2 * triangles[i].v[v]]));
+			}
+
+			glColor3f(color[0], color[1], color[2]);
+			glNormal3f(vertices[triangles[i].v[v]].n[0], vertices[triangles[i].v[v]].n[1], vertices[triangles[i].v[v]].n[2]);
+			glVertex3f(vertices[triangles[i].v[v]].p[0], vertices[triangles[i].v[v]].p[1], vertices[triangles[i].v[v]].p[2]);
+		}
+
+	}
+	glEnd();
+}
+
 
 float det(const Vec3Df & v0, const Vec3Df & v1, const Vec3Df & v2)
 
@@ -384,6 +407,9 @@ bool Mesh::loadMesh(const char * filename)
 
     //centerAndScaleToUnit();
     computeVertexNormals();
+
+	lighting.resize(vertices.size());
+
     return true;
 }
 
@@ -408,11 +434,12 @@ bool Mesh::loadMesh(int NbVertX, int NbVertY, float qurdSize){
 	//SurfaceColors3f.resize(3 * NbVertX * NbVertY);
 
 	//float qurdSize = 1;
-	float z = 0;
+	
 	int ind1 = 0;
 	int ind2 = 0;
 	int ind3 = 0;
 
+	float z;
 	float x;
 	float y;
 	//float z;
@@ -423,19 +450,42 @@ bool Mesh::loadMesh(int NbVertX, int NbVertY, float qurdSize){
 		{
 
 			//float z = sin(j)*sin(i);
-			z = sin(j);
+			/*z = sin(j);
 			if (j == NbVertX - 1 || j == 0)
 			{
 				z = 0;
 			}
 			z *= qurdSize;
-			z -= 2;
+			z -= 2;*/
+			if (j == 0 || j == NbVertX - 1 || i == 0 || i == NbVertY - 1)
+			{
+				z = -i*qurdSize;
+			}
+			else
+			{
+				z = -i*qurdSize + rand() / (RAND_MAX / (qurdSize - 0.1) - (qurdSize - 0.1) / 2);
+			}
+			
+			if (j == 0 || j == NbVertX - 1 || i == 0 || i == NbVertY - 1)
+			{
+				x = j*qurdSize;
+			}
+			else
+			{
+				x = j*qurdSize + rand() / (RAND_MAX / (qurdSize - 0.1) - (qurdSize - 0.1) / 2);
+			}
+			
+			if (j == 0 || j == NbVertX - 1 || i == 0 || i == NbVertY - 1)
+			{
+				y = i*qurdSize;
+			}
+			else
+			{
+				y = rand() % 4 - 0.5;
+			}
 
-			x = j*qurdSize;
 			SurfaceVertices3f[ind1] = x;
 			ind1++;
-
-			y = i*qurdSize;
 			SurfaceVertices3f[ind1] = y;
 			ind1++;
 
@@ -498,6 +548,8 @@ bool Mesh::loadMesh(int NbVertX, int NbVertY, float qurdSize){
 
 	//centerAndScaleToUnit();
 	computeVertexNormals();
+
+	lighting.resize(vertices.size());
 
 	return true;
 }
@@ -593,6 +645,8 @@ void Mesh::loadRoad(int NbVertX, int NbVertY, float qurdSizeX, float qurdSizeY){
 
 	//centerAndScaleToUnit();
 	computeVertexNormals();
+
+	lighting.resize(vertices.size());
 
 }
 
