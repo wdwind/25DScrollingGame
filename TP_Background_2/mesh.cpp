@@ -50,11 +50,11 @@ void Mesh::computeVertexNormals () {
     //Somme des normales du 1 voisinage du vertex
     for (unsigned int i = 0; i < triangles.size (); i++) {
         Vec3Df edge01 = vertices[triangles[i].v[1]].p -  vertices[triangles[i].v[0]].p;
-        Vec3Df edge02 = vertices[triangles[i].v[2]].p -  vertices[triangles[i].v[0]].p;
+        Vec3Df edge02 = vertices[triangles[i].v[1]].p -  vertices[triangles[i].v[2]].p;
         Vec3Df n = Vec3Df::crossProduct (edge01, edge02);
         n.normalize ();
         for (unsigned int j = 0; j < 3; j++)
-            vertices[triangles[i].v[j]].n += n;
+            vertices[triangles[i].v[j]].n -= n;
     }
 
     //Normalisation
@@ -382,7 +382,7 @@ bool Mesh::loadMesh(const char * filename)
     }
     fclose(in);
 
-    centerAndScaleToUnit();
+    //centerAndScaleToUnit();
     computeVertexNormals();
     return true;
 }
@@ -429,6 +429,7 @@ bool Mesh::loadMesh(int NbVertX, int NbVertY, float qurdSize){
 				z = 0;
 			}
 			z *= qurdSize;
+			z -= 2;
 
 			x = j*qurdSize;
 			SurfaceVertices3f[ind1] = x;
@@ -501,6 +502,100 @@ bool Mesh::loadMesh(int NbVertX, int NbVertY, float qurdSize){
 	return true;
 }
 
+void Mesh::loadRoad(int NbVertX, int NbVertY, float qurdSizeX, float qurdSizeY){
+	//int NbVertX = 7, NbVertY = 2;
+	//float qurdSize = 1;
+	//vertices
+	std::vector<float> SurfaceVertices3f;
+	//colors
+	//std::vector<float> SurfaceColors3f;
+
+	//triangle indices (three successive entries: n1, n2, n3 represent a triangle, each n* is an index representing a vertex.)
+	std::vector<unsigned int> SurfaceTriangles3ui;
+
+	//vertices with 3 coordinates
+	SurfaceVertices3f.resize(3 * NbVertX * NbVertY);
+	//texture coords per vertex
+	texcords2f.resize(2 * NbVertX * NbVertY);
+	//triangles (2 per default)
+	SurfaceTriangles3ui.resize(3 * (NbVertX - 1) * (NbVertY - 1) * 2);
+	//per vertex colors 
+	//SurfaceColors3f.resize(3 * NbVertX * NbVertY);
+
+	//float qurdSize = 1;
+	float z = 0;
+	int ind1 = 0;
+	int ind2 = 0;
+	int ind3 = 0;
+
+	float x;
+	float y;
+	//float z;
+
+	for (int i = 0; i < NbVertY; i++)
+	{
+		for (int j = 0; j < NbVertX; j++)
+		{
+			x = j*qurdSizeX;
+			SurfaceVertices3f[ind1] = x;
+			ind1++;
+
+			y = i*qurdSizeY;
+			SurfaceVertices3f[ind1] = z;
+			ind1++;
+
+			SurfaceVertices3f[ind1] = y;
+			ind1++;
+
+			texcords2f[ind2] = x;
+			ind2++;
+			texcords2f[ind2] = z;
+			ind2++;
+
+			if (i < NbVertY - 1 && j < NbVertX - 1)
+			{
+				SurfaceTriangles3ui[ind3] = j + i*NbVertX;
+				ind3++;
+				/*SurfaceTriangles3ui[ind3] = j + 1 + i*NbVertX;
+				ind3++;
+				SurfaceTriangles3ui[ind3] = j + (i + 1)*NbVertX;
+				ind3++;*/
+
+				SurfaceTriangles3ui[ind3] = j + (i + 1)*NbVertX;
+				ind3++;
+				SurfaceTriangles3ui[ind3] = j + 1 + i*NbVertX;
+				ind3++;
+
+				SurfaceTriangles3ui[ind3] = j + (i + 1)*NbVertX;
+				ind3++;
+				/*SurfaceTriangles3ui[ind3] = j + 1 + i*NbVertX;
+				ind3++;
+				SurfaceTriangles3ui[ind3] = j + 1 + (i + 1)*NbVertX;
+				ind3++;*/
+
+				SurfaceTriangles3ui[ind3] = j + 1 + (i + 1)*NbVertX;
+				ind3++;
+				SurfaceTriangles3ui[ind3] = j + 1 + i*NbVertX;
+				ind3++;
+			}
+		}
+	}
+
+	for (int i = 0; i < SurfaceTriangles3ui.size(); i += 3)
+	{
+		triangles.push_back(Triangle(SurfaceTriangles3ui[i], SurfaceTriangles3ui[i + 1], SurfaceTriangles3ui[i + 2]));
+	}
+
+	for (int i = 0; i < SurfaceVertices3f.size(); i += 3)
+	{
+		vertices.push_back(Vertex(Vec3Df(SurfaceVertices3f[i], SurfaceVertices3f[i + 1], SurfaceVertices3f[i + 2])));
+	}
+
+	//centerAndScaleToUnit();
+	computeVertexNormals();
+
+}
+
 void Mesh::drawNormals()
 {
 	for (int i = 0; i < vertices.size(); i ++)
@@ -510,7 +605,54 @@ void Mesh::drawNormals()
 		glColor3f(1, 0, 0);
 		//glTranslatef(SurfaceVertices3f[i], SurfaceVertices3f[i+1], SurfaceVertices3f[i+2]);
 		glVertex3f(vertices[i].p[0], vertices[i].p[1], vertices[i].p[2]);
-		glVertex3f(vertices[i].p[0] + vertices[i].n[0], vertices[i].p[0] + vertices[i].n[0], vertices[i].p[0] + vertices[i].n[0]);
+		glVertex3f(vertices[i].p[0] + vertices[i].n[0], vertices[i].p[1] + vertices[i].n[1], vertices[i].p[2] + vertices[i].n[2]);
+		glPopMatrix();
+		glEnd();
+	}
+}
+
+void Mesh::drawSomeP(float* mv)
+{
+	int interval = vertices.size() / 10;
+	for (int i = 0; i < vertices.size(); i+=interval)
+	{
+		glBegin(GL_LINES);
+		
+		glColor3f(1, 1, 0);
+		//glTranslatef(SurfaceVertices3f[i], SurfaceVertices3f[i+1], SurfaceVertices3f[i+2]);
+		glVertex3f(0, 0, 0);
+		float xp = mv[0] * vertices[i].p[0] + mv[4] * vertices[i].p[1] + mv[8] * vertices[i].p[2] + mv[12];
+		float yp = mv[1] * vertices[i].p[0] + mv[5] * vertices[i].p[1] + mv[9] * vertices[i].p[2] + mv[13];
+		float zp = mv[2] * vertices[i].p[0] + mv[6] * vertices[i].p[1] + mv[10] * vertices[i].p[2] + mv[14];
+		float wp = mv[3] * vertices[i].p[0] + mv[7] * vertices[i].p[1] + mv[11] * vertices[i].p[2] + mv[15];
+
+		xp /= wp;
+		yp /= wp;
+		zp /= wp;
+
+		cout << xp << endl;
+
+		glVertex3f(xp,yp,zp);
+		
+		glEnd();
+	}
+}
+
+void Mesh::drawSomeP()
+{
+	int interval = vertices.size() / 2;
+	for (int i = 0; i < vertices.size(); i += 1)
+	{
+		glBegin(GL_LINES);
+		glPushMatrix();
+		glColor3f(1, 0, 1);
+		//glTranslatef(SurfaceVertices3f[i], SurfaceVertices3f[i+1], SurfaceVertices3f[i+2]);
+		glVertex3f(0, 0, 0);
+		//xp /= wp;
+		//yp /= wp;
+		//zp /= wp;
+
+		glVertex3f(vertices[i].p[0] + 4, vertices[i].p[1] + 0.5, vertices[i].p[2] + 1);
 		glPopMatrix();
 		glEnd();
 	}

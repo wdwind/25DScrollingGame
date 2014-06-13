@@ -45,12 +45,15 @@ public:
 
     bool loadMesh(const char * filename);
 	bool loadMesh(int NbVertX = 7, int NbVertY = 3, float qurdSize = 1);
+	void loadRoad(int NbVertX = 7, int NbVertY = 3, float qurdSizeX = 1, float qurdSizeY = 1);
     void computeVertexNormals ();
     void centerAndScaleToUnit ();
     void draw();
     void drawSmooth();
 	void drawWithColors(const std::vector<Vec3Df> & colors);
 	void drawNormals();
+	void drawSomeP(float* mv);
+	void drawSomeP();
     void computeBoundingCube();
 	int getClosestVertexIndex(const Vec3Df & origin, const Vec3Df & direction);
 
