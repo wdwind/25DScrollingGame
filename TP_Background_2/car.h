@@ -11,6 +11,7 @@ Draw car.
 #include <vector>
 #include <math.h>
 #include <iostream>
+#include "bullet.h"
 
 //static const float mf[] = { (float)0.03, (float)0.1, (float)0.23 };
 //std::vector<float> PositionBullet(mf, mf + sizeof(mf) / sizeof(float));
@@ -19,6 +20,7 @@ class Car{
 public:
 	Car(){
 		PositionBullet = { (float)0.03, (float)0.1, (float)0.23 };
+		
 	};
 
 	float ballX = 0.1f;
@@ -30,6 +32,11 @@ public:
 	std::vector<float> PositionBullet;
 	 //= { (float)0.03, (float)0.1, (float)0.23 };
 	//PositionBullet.push_back(1);
+
+	//Bullet temp1 = Bullet();
+
+	std::vector<Bullet> bullets;
+	
 
 	GLfloat firstVertexOfTri = 0.0;
 	GLfloat incrementOfVertex = .001;
@@ -126,27 +133,62 @@ public:
 		glPopMatrix();
 	}
 
+	void drawBullet2(){
+		if (bullets.empty())
+		{
+			bullets.push_back(Bullet());
+		}
+
+		bullets.end()->shot = true;
+
+		bullets.push_back(Bullet());
+
+		//glColor3f(0, 0, 1);
+
+		glPushMatrix();
+		glRotatef(rCanon, 0, 0, -1);
+		glTranslatef(PositionBullet[0], PositionBullet[1], PositionBullet[2]);
+		//glutSolidSphere(.05, 50, 50);
+		
+		//temp1.drawBullet();
+		
+		glPopMatrix();
+	}
+
 	void drawCar()
 	{
+		//temp1.origin = Vec3Df(0.5, 0.5, 0.5);
+		
 		glPushMatrix(); //draw the car body
 		glScalef(2, 1, 1);
 		//glNormal3f(1, 2, 0);
 		drawUnitCube();
 		glPushMatrix(); //draw the canon
 		glTranslatef(0.5, 0.5, 0.5);
+
+		//temp1.rotate = Vec3Df(0, 0, -1);
+		//temp1.translate = Vec3Df(PositionBullet[0], PositionBullet[1], PositionBullet[2]);
+		//temp1.theta = rCanon;
+
 		drawBullet();
+		
+
 		glRotatef(rCanon, 0, 0, -1); //control the canon
 		glScalef(1.2, 0.3, 0.3);
 		//glNormal3f(1, 2, 0);
 		drawUnitCube();
 		drawBall(); //draw the wheels
+		
 		glPopMatrix();
 		glPopMatrix();
+
+		
 	}
 
 	void canonClock(){
 		if (rCanon >= -45 && rCanon < 0){
 			rCanon += 3;
+			
 		}
 	}
 
@@ -156,13 +198,13 @@ public:
 		}
 	}
 
-	void drawEnemy(){
-		glPushMatrix();
-		glTranslatef(3, 0, 0);
-		glScalef(2, 2, 2);
-		drawUnitFace();
-		glPopMatrix();
-	}
+	//void drawEnemy(){
+	//	glPushMatrix();
+	//	glTranslatef(3, 0, 0);
+	//	glScalef(2, 2, 2);
+	//	drawUnitFace();
+	//	glPopMatrix();
+	//}
 };
 
 

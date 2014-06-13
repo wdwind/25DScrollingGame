@@ -12,6 +12,7 @@
 #include "move.h"
 #include "utils.h"
 #include "enemy.h"
+#include "bullet.h"
 
 using namespace std;
 
@@ -31,6 +32,7 @@ std::vector<GLuint> Texture;
 std::vector<Mesh> meshes;
 std::vector<Enemy> enemies;
 Car car;
+//Bullet b;
 
 // Test
 GLUquadricObj *sphere = NULL;
@@ -372,16 +374,22 @@ void dessinerBackground()
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, Texture[1]);
-		gluSphere(sphere, 5.0, 20, 20);
+		//gluSphere(sphere, 5.0, 20, 20);
 	glBindTexture(GL_TEXTURE_2D, 2);
 	glDisable(GL_TEXTURE_2D);
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, Texture[0]);
 		glColor3f(1, 1, 1);
-		gluSphere(sphere, .5, 20, 20);
+		//gluSphere(sphere, .5, 20, 20);
 	glBindTexture(GL_TEXTURE_2D, 2);
 	glDisable(GL_TEXTURE_2D);
+
+	glPushMatrix();
+	glTranslated(0.5, 0.5, 0.5);
+	/*b = Bullet(Vec3Df(0.5, 0.5, 0.5));
+	b.drawBullet();*/
+	glPopMatrix();
 
 	// Draw distant view
 	glPushMatrix();
@@ -501,15 +509,29 @@ void dessinerOther(){
 		enemies[0].drawSomeP();
 	}
 
+	//b.drawCurrentPos();
+
 	if (drawC)
 		car.drawCar();
 
 	if (shot){
 		if (car.PositionBullet[0] < 6){
-			car.PositionBullet[0] += 0.03;
+			car.PositionBullet[0] += 0.003;
+			//car.temp1.drawCurrentPos();
+
+			/*glPushMatrix();
+			glTranslatef(car.PositionBullet[0], 0, 0);
+			b.drawBullet();
+			glPopMatrix();*/
 		}
 		else if (car.PositionBullet[0] >= 6){
 			car.PositionBullet[0] = 0.03;
+			//car.temp1.drawCurrentPos();
+
+			/*glPushMatrix();
+			glTranslatef(car.PositionBullet[0], 0, 0);
+			b.drawBullet();
+			glPopMatrix();*/
 		}
 	}
 
