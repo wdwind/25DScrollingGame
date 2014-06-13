@@ -9,23 +9,35 @@
 #include "mesh.h"
 #include "loadppm.h"
 #include "car.h"
+#include "move.h"
+#include "utils.h"
 
 using namespace std;
+
+// Functions
 void computeLighting();
 void dealWithUserInput(int x, int y);
-Mesh MyMesh, MyMesh2;
+void drawCar();
+void initTexture();
+void keyboard(unsigned char key, int x, int y);
+void display(void);
+void reshape(int w, int h);
+
+// Basic variables
 unsigned int W_fen = 800;  // largeur fenetre
 unsigned int H_fen = 800;  // hauteur fenetre
-void drawCar();
 
 std::vector<GLuint> Texture;
+//Mesh MyMesh, MyMesh2, enemy;
+std::vector<Mesh> meshes;
+std::vector<std::vector<Vec3Df>> lightings;
+std::vector<Vec3Df> translates;
 
-//________________________________
-//________________________________
-//________________________________
-//________________________________
-//________________________________
-//Start reading here!!!
+int enemyIndex = 4;
+
+//std::vector<Vec3Df> lighting;
+//std::vector<Vec3Df> lighting2;
+//std::vector<Vec3Df> lighting3;
 
 //Background color
 float BackgroundColor[]={0,0,0};
@@ -51,7 +63,7 @@ int SelectedLight=0;
 //The position of the camera
 //this variable will be updated by the program! Do not change it manually!
 //Of course, you can USE its value
-Vec3Df CamPos = Vec3Df(0.0f,0.0f,-4.0f);
+Vec3Df CamPos;// = Vec3Df(0.0f, 0.0f, -4.0f);
 
 
 //Pressing 's' will display the currently chosen vertex
@@ -63,20 +75,20 @@ bool ShowSelectedVertex=false;
 int SelectedVertex=-1;
 
 //per vertex attributes, useful for materials - see later exercises
-std::vector<Vec3Df> MeshMaterial;
+//std::vector<Vec3Df> MeshMaterial;
 
 float lightPower = 5;
 float s = 5;
 float showDot = true;
 
 
-int NbVertX = 10;
-int NbVertY = 4;
+int NbVertX = 8;
+int NbVertY = 3;
 float qurdSize = 1;
 
 float Vx1 = -2;
 float Vx2 = (NbVertX - 1)*qurdSize + Vx1;
-float threshold = -13;
+float threshold = -9;
 
 int showText = 2;
 int temp = showText;
@@ -84,9 +96,19 @@ bool drawN = false;
 bool drawC = false;
 float backgroundSpeed = 0.005;
 
+Vec3Df defaultLightPos = Vec3Df(2, 3, 2);
+
 bool shot = false;
 bool temp1 = false;
 bool temp2 = false;
+bool temp3 = true;
+
+bool drawB = false;
+
+float mv[16];
+
+//Lighting of the model (you should not need to touch this one...
+
 
 template <typename T>
 T clip(const T& n, const T& lower, const T& upper) {
@@ -203,12 +225,75 @@ Vec3Df computeLighting(Vec3Df & vertexPos, Vec3Df & normal, unsigned int light, 
 	}
 }
 
-
-
-//User interaction - when the user chooses a vertex, you receive its position, normal, its index 
-//you can use it to NOW modify all global variables, such as the light position, or change material properties etc.
-void userInteraction(const Vec3Df & selectedPos, const Vec3Df & selectedNormal, int selectedIndex)
+void computeLighting()
 {
+	for (int j = 0; j < lightings.size(); j++)
+	{
+		std::vector<Vec3Df> *result = &(lightings[j]);
+
+		for (unsigned int i = 0; i<meshes[j].vertices.size(); ++i)
+		{
+			(*result)[i] = Vec3Df();
+			for (int l = 0; l < LightPos.size(); ++l)
+				(*result)[i] += computeLighting(meshes[j].vertices[i].p + translates[j], meshes[j].vertices[i].n, l, i);
+		}
+	}
+
+/*
+	std::vector<Vec3Df> *result = &lighting;
+
+
+	for (unsigned int i = 0; i<MyMesh.vertices.size(); ++i)
+	{
+		(*result)[i] = Vec3Df();
+		for (int l = 0; l < LightPos.size(); ++l)
+			(*result)[i] += computeLighting(MyMesh.vertices[i].p + Vec3Df(Vx1, 0, 0), MyMesh.vertices[i].n, l, i);
+	}
+
+	std::vector<Vec3Df> *result2 = &lighting2;
+
+
+	for (unsigned int i = 0; i<MyMesh2.vertices.size(); ++i)
+	{
+		(*result2)[i] = Vec3Df();
+		for (int l = 0; l < LightPos.size(); ++l)
+			(*result2)[i] += computeLighting(MyMesh2.vertices[i].p + Vec3Df(Vx2, 0, 0), MyMesh2.vertices[i].n, l, i);
+	}
+
+	std::vector<Vec3Df> *result3 = &lighting3;
+
+	for (unsigned int i = 0; i<enemy.vertices.size(); ++i)
+	{
+		(*result3)[i] = Vec3Df();
+		for (int l = 0; l < LightPos.size(); ++l)
+			(*result3)[i] += computeLighting(enemy.vertices[i].p, enemy.vertices[i].n, l, i);
+	}*/
+}
+
+
+void collisionDetect(Vec3Df start){
+	glBegin(GL_LINES);
+	glPushMatrix();
+	glColor3f(1, 0, 0);
+	glVertex3f(0, 0, 0);
+	glVertex3f(0.5 + PositionBullet[0], 0.5 + PositionBullet[1], 0.5 + PositionBullet[2]);
+	glPopMatrix();
+	glEnd();
+
+	int t;
+	for (int i = 0; i < meshes[enemyIndex].triangles.size(); i++)
+	{
+		Vec3Df* vv;
+		Vec3Df t1 = meshes[enemyIndex].vertices[meshes[enemyIndex].triangles[i].v[0]].p;
+		Vec3Df t2 = meshes[enemyIndex].vertices[meshes[enemyIndex].triangles[i].v[1]].p;
+		Vec3Df t3 = meshes[enemyIndex].vertices[meshes[enemyIndex].triangles[i].v[2]].p;
+		RealTriangle rt = RealTriangle(t1, t2, t3);
+		t = intersect3D_RayTriangle(Vec3Df(PositionBullet[0], PositionBullet[1], PositionBullet[2]), Vec3Df(PositionBullet[0] + 10, PositionBullet[1], PositionBullet[2]), rt);
+
+		if (t==1)
+			cout << t << endl;
+	}
+	
 }
 
 /**
@@ -218,6 +303,10 @@ void animate()
 {
 	Vx1 -= backgroundSpeed;
 	Vx2 -= backgroundSpeed;
+
+	if (temp3){
+		rBall += incrementOfrball;
+	}
 
 	if (temp1) {
 		int t = 1;
@@ -238,8 +327,178 @@ void animate()
 		}
 		glPopMatrix();
 	}
+
+	//collisionDetect();
 }
 
+
+
+//Everything below, you do NOT have to read!!!
+//________________________________
+//________________________________
+//________________________________
+//________________________________
+//________________________________
+
+
+
+
+/************************************************************
+ * Function to initialize the mesh
+ ************************************************************/
+void init(){
+
+	//this function loads a mesh
+	Mesh enemy;
+	enemy.loadMesh("enemy.obj");
+	meshes.push_back(enemy);
+
+	std::vector<Vec3Df> lighting3;
+	lighting3.resize(enemy.vertices.size());
+
+	lightings.push_back(lighting3);
+
+	translates.push_back(Vec3Df(4, 0.5, 1));
+	//MeshMaterial.resize(MyMesh.vertices.size());
+	//for (int i=0; i<MyMesh.vertices.size();++i)
+	//	MeshMaterial[i]=Vec3Df(0,0,0);
+		
+	LightPos.push_back(defaultLightPos);
+	LightColor.push_back(Vec3Df(1,1,1));
+	//computeLighting();
+}
+
+
+
+/************************************************************
+ * Call different drawing functions
+************************************************************/
+void dessinerBackground()
+{
+	glPointSize(10);
+
+	// Draw light
+	glPushMatrix();
+		glColor3f(1, 0, 0);
+		glTranslatef(LightPos[0][0], LightPos[0][1], LightPos[0][2]);
+		glutSolidSphere(.5, 50, 50);
+	glPopMatrix();
+
+	switch( mode )
+    {
+    case ORIGINAL_LIGHTING:
+		{
+			Vec3Df p;
+			if (ShowSelectedVertex&&SelectedVertex>=0)
+			{
+				p=meshes[0].vertices[SelectedVertex].p;
+				glBegin(GL_POINTS);
+				glVertex3f(p[0],p[1],p[2]);
+				glEnd();
+			}
+
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, Texture[showText]);
+
+			meshes[0].drawWithColors(lightings[0]);
+
+			glTranslatef(3,0,0);
+			meshes[1].drawWithColors(lightings[1]);
+
+			meshes[2].drawWithColors(lightings[2]);
+
+			glBindTexture(GL_TEXTURE_2D, 2);
+			glDisable(GL_TEXTURE_2D);
+		}
+		break;
+    default:
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, Texture[showText]);
+
+		if (Vx1 < threshold)
+		{
+			Vx1 += 2 * (NbVertX - 1) * qurdSize;
+		}
+
+		if (Vx2 < threshold)
+		{
+			Vx2 += 2 * (NbVertX - 1) * qurdSize;
+		}
+
+		glPushMatrix();
+			glTranslatef(Vx1, 0, 0);
+			meshes[0].drawWithColors(lightings[0]);
+			translates[0] = Vec3Df(Vx1, 0, 0);
+		glPopMatrix();
+
+		glPushMatrix();
+			glTranslatef(Vx2, 0, 0);
+			meshes[1].drawWithColors(lightings[1]);
+			translates[1] = Vec3Df(Vx2, 0, 0);
+		glPopMatrix();
+
+		glBindTexture(GL_TEXTURE_2D, 2);
+		glDisable(GL_TEXTURE_2D);
+
+
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, Texture[1]);
+
+		glPushMatrix();
+			glTranslatef(Vx1, 0, -2);
+			meshes[2].drawWithColors(lightings[2]);
+			meshes[2].drawNormals();
+			translates[2] = Vec3Df(Vx1, 0, -2);
+		glPopMatrix();
+
+		glPushMatrix();
+			glTranslatef(Vx2, 0, -2);
+			meshes[3].drawWithColors(lightings[3]);
+			meshes[3].drawNormals();
+			translates[3] = Vec3Df(Vx2, 0, -2);
+		glPopMatrix();
+
+		glBindTexture(GL_TEXTURE_2D, 2);
+		glDisable(GL_TEXTURE_2D);
+
+		break;
+    }
+}
+
+void dessinerOther(){
+	glPushMatrix();
+	glTranslatef(translates[enemyIndex][0], translates[enemyIndex][1], translates[enemyIndex][2]);
+	//glRotatef(180, 0, 1, 0);
+	//glGetFloatv(GL_MODELVIEW_MATRIX, mv);
+	//enemy.draw();
+	meshes[enemyIndex].drawWithColors(lightings[enemyIndex]);
+	glPopMatrix();
+
+	if (drawN)
+	{
+		meshes[enemyIndex].drawNormals();
+		meshes[enemyIndex].drawSomeP();
+	}
+
+	if (drawC)
+		drawCar();
+
+	if (shot){
+		if (PositionBullet[0] < 6){
+			PositionBullet[0] += 0.003;
+		}
+		else if (PositionBullet[0] >= 6){
+			PositionBullet[0] = 0.03;
+		}
+	}
+
+	if (drawB)
+		collisionDetect(Vec3Df(0, 0, 1));
+
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
 
 // prise en compte du clavier
 //Vous allez ajouter quelques fonctionalites pendant le TP
@@ -247,89 +506,84 @@ void animate()
 
 void keyboard(unsigned char key, int x, int y)
 {
-    printf("key %d pressed at %d,%d\n",key,x,y);
-    fflush(stdout);
-    if (key>'0'&& key<='7')
+	printf("key %d pressed at %d,%d\n", key, x, y);
+	fflush(stdout);
+	if (key>'0'&& key <= '7')
 	{
-		mode=Mode(key-'1');
+		mode = Mode(key - '1');
 		computeLighting();
 		return;
 	}
-	
-	switch (key)
-    {
-	//A remplir
-	case 'r':
-	break;
-	case 'R':
-	break;
-	case 'g':
-	break;
-	case 'G':
-	break;
-	case 'b':
-	break;
-	case 'B':
-	break;
 
-	
-	//less important
+	switch (key)
+	{
+		//A remplir
+	case 'r':
+		break;
+	case 'R':
+		break;
+	case 'g':
+		break;
+	case 'G':
+		break;
+	case 'b':
+		drawB = true;
+		break;
+	case 'B':
+		break;
+
+
+		//less important
 	case 'l':
-		{
-			LightPos[SelectedLight]=getCameraPosition();
-			return;
-		}
+	{
+				LightPos[SelectedLight] = getCameraPosition();
+				return;
+	}
 	case 'L':
-		{
-			LightPos.push_back(getCameraPosition());
-			LightColor.push_back(Vec3Df(1,1,1));
-			return;
-		}
+	{
+				LightPos.push_back(getCameraPosition());
+				LightColor.push_back(Vec3Df(1, 1, 1));
+				return;
+	}
 	case '+':
-		{
-			++SelectedLight;
-			if (SelectedLight>=LightPos.size())
-				SelectedLight=0;
-			return;
-		}
+	{
+				++SelectedLight;
+				if (SelectedLight >= LightPos.size())
+					SelectedLight = 0;
+				return;
+	}
 	case '-':
-		{
-			--SelectedLight;
-			if (SelectedLight<0)
-				SelectedLight=LightPos.size()-1;
-			return;
-		}
+	{
+				--SelectedLight;
+				if (SelectedLight<0)
+					SelectedLight = LightPos.size() - 1;
+				return;
+	}
 	case 'U':
-		{
-			updateAlways=!updateAlways;
-			return;
-		}
+	{
+				updateAlways = !updateAlways;
+				return;
+	}
 
 	case 'N':
-		{	//reset all lights
-			LightPos.resize(1);
-			LightPos[0]=Vec3Df(0,0,3);
-			LightColor.resize(1);
-			LightColor[0]=Vec3Df(1,1,1);
-			SelectedLight=0;
-		}
+	{	//reset all lights
+				LightPos.resize(1);
+				LightPos[0] = defaultLightPos;
+				LightColor.resize(1);
+				LightColor[0] = Vec3Df(1, 1, 1);
+				SelectedLight = 0;
+	}
 
 	case 'u':
-		{
-			//update lighing (only useful for slow computers)
-			computeLighting();
-			return;
-		}
+	{
+				//update lighing (only useful for slow computers)
+				computeLighting();
+				return;
+	}
 	case 's':
 	{
-		ShowSelectedVertex=!ShowSelectedVertex;
+				ShowSelectedVertex = !ShowSelectedVertex;
 	}
-	case ' ':
-		{
-			//You do not need to look at the function below
-			//it does some computations then calls dealWithUserInput
-			dealWithUserInput(x,y);
-		}
 	case 'x':
 		Vx1 += 0.1;
 		Vx2 += 0.1;
@@ -367,161 +621,65 @@ void keyboard(unsigned char key, int x, int y)
 	case 'j':
 		shot = true;
 		break;
+	case 'p':
+		printVector(mv, 16);
+		break;
 	}
 
 }
 
-//Everything below, you do NOT have to read!!!
-//________________________________
-//________________________________
-//________________________________
-//________________________________
-//________________________________
+void background(){
+	Mesh MyMesh;
+	std::vector<Vec3Df> lighting;
 
-
-//Lighting of the model (you should not need to touch this one...
-std::vector<Vec3Df> lighting;
-std::vector<Vec3Df> lighting2;
-
-/************************************************************
- * Fonction pour initialiser le maillage
- ************************************************************/
-void init(const char * fileName){
-
-	//this function loads a mesh
-    MyMesh.loadMesh(NbVertX, NbVertY, qurdSize);
+	MyMesh.loadMesh(NbVertX, NbVertY, qurdSize);
 	lighting.resize(MyMesh.vertices.size());
+
+	Mesh MyMesh2;
+	std::vector<Vec3Df> lighting2;
 
 	MyMesh2.loadMesh(NbVertX, NbVertY, qurdSize);
 	lighting2.resize(MyMesh2.vertices.size());
-	
-	MeshMaterial.resize(MyMesh.vertices.size());
-	for (int i=0; i<MyMesh.vertices.size();++i)
-		MeshMaterial[i]=Vec3Df(0,0,0);
-		
-	LightPos.push_back(Vec3Df(0,0,3));
-	LightColor.push_back(Vec3Df(1,1,1));
-	computeLighting();
+
+	Mesh MyMesh3;
+	std::vector<Vec3Df> lighting3;
+
+	MyMesh3.loadRoad(NbVertX, 3, 1, 3);
+	lighting3.resize(MyMesh3.vertices.size());
+
+	Mesh MyMesh4;
+	std::vector<Vec3Df> lighting4;
+
+	MyMesh4.loadRoad(NbVertX, 3, 1, 3);
+	lighting4.resize(MyMesh4.vertices.size());
+
+	meshes.push_back(MyMesh);
+	meshes.push_back(MyMesh2);
+	meshes.push_back(MyMesh3);
+	meshes.push_back(MyMesh4);
+
+	lightings.push_back(lighting);
+	lightings.push_back(lighting2);
+	lightings.push_back(lighting3);
+	lightings.push_back(lighting4);
+
+	translates.push_back(Vec3Df(0, 0, 0));
+	translates.push_back(Vec3Df(0, 0, 0));
+	translates.push_back(Vec3Df(0, 0, 0));
+	translates.push_back(Vec3Df(0, 0, 0));
+
+	//computeLighting();
 }
 
-
-
-/************************************************************
- * Appel des différentes fonctions de dessin
-************************************************************/
-
-
-void dealWithUserInput(int x, int y)
+void idle()
 {
-	Vec3Df worldPoint=getWorldPositionOfPixel(x, H_fen-y);
-	SelectedVertex=MyMesh.getClosestVertexIndex(CamPos, worldPoint-CamPos);
-	if (SelectedVertex>=0)
-	{
-		Vec3Df selectedPos=MyMesh.vertices[SelectedVertex].p;
-		Vec3Df selectedNormal=MyMesh.vertices[SelectedVertex].n;
-		userInteraction(selectedPos, selectedNormal, SelectedVertex);				
-	}
-}
+	//CamPos=getCameraPosition();
 
-void dessiner( )
-{
+	if (updateAlways)
+		computeLighting();
 
-	glPointSize(10);
-	glBegin(GL_POINTS);
-	//LightColor
-	glColor3f(1,0,0);	
-	
-	for (int i=0; i<LightPos.size();++i)	
-	{	
-		glVertex3f(LightPos[i][0],LightPos[i][1],LightPos[i][2]);
-	}
-	glEnd();
-	
-	glPointSize(40);
-	glColor3f(1,1,0);	
-	glBegin(GL_POINTS);
-	glVertex3f(LightPos[SelectedLight][0],LightPos[SelectedLight][1],LightPos[SelectedLight][2]);
-	glEnd();
-
-	switch( mode )
-    {
-    case ORIGINAL_LIGHTING:
-		{
-			Vec3Df p;
-			if (ShowSelectedVertex&&SelectedVertex>=0)
-			{
-				p=MyMesh.vertices[SelectedVertex].p;
-				glBegin(GL_POINTS);
-				glVertex3f(p[0],p[1],p[2]);
-				glEnd();
-			}
-
-			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, Texture[showText]);
-
-			MyMesh.drawWithColors(lighting);
-
-			glTranslatef(3,0,0);
-			MyMesh2.drawWithColors(lighting2);
-
-			glBindTexture(GL_TEXTURE_2D, 2);
-			glDisable(GL_TEXTURE_2D);
-		}
-		break;
-    default:
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, Texture[showText]);
-
-		if (Vx1 < threshold)
-		{
-			Vx1 += 2 * (NbVertX - 1) * qurdSize;
-		}
-
-		if (Vx2 < threshold)
-		{
-			Vx2 += 2 * (NbVertX - 1) * qurdSize;
-		}
-
-		glPushMatrix();
-
-		glTranslatef(Vx1, 0, 0);
-		MyMesh.drawWithColors(lighting);
-
-		if (drawN)
-		{
-			MyMesh.drawNormals();
-		}
-
-		glPopMatrix();
-
-		glPushMatrix();
-		glTranslatef(Vx2, 0, 0);
-		MyMesh2.drawWithColors(lighting2);
-		glPopMatrix();
-
-
-		glBindTexture(GL_TEXTURE_2D, 2);
-		glDisable(GL_TEXTURE_2D);
-
-		if (drawC)
-			drawCar();
-
-		if (shot){
-				if (PositionBullet[0] < 6){
-					PositionBullet[0] += 0.3;
-					drawBullet();
-				}
-				else if (PositionBullet[0] >= 6){
-					PositionBullet[0] = 0.03;
-					PositionBullet[0] += 0.3;
-					drawBullet();
-				}
-
-			//shot = false;
-		}
-			
-		break;
-    }
+	glutPostRedisplay();
+	animate();
 }
 
 //this function loads the textures in the GPU memory
@@ -563,129 +721,93 @@ void initTexture()
 }
 
 
-void idle()
-{
-	CamPos=getCameraPosition();
-
-	if (updateAlways)
-		computeLighting();
-
-	glutPostRedisplay();
-	animate();
-}
-
-void display(void);
-void reshape(int w, int h);
-void keyboard(unsigned char key, int x, int y);
-
-
-void computeLighting()
-{
-	std::vector<Vec3Df> *result=&lighting;
-
-
-	for (unsigned int i=0; i<MyMesh.vertices.size();++i)
-	{
-		(*result)[i]=Vec3Df();
-		for (int l = 0; l < LightPos.size(); ++l)
-			(*result)[i] += computeLighting(MyMesh.vertices[i].p + Vec3Df(Vx1, 0, 0), MyMesh.vertices[i].n, l, i);
-	}
-
-	std::vector<Vec3Df> *result2 = &lighting2;
-
-
-	for (unsigned int i = 0; i<MyMesh2.vertices.size(); ++i)
-	{
-		(*result2)[i] = Vec3Df();
-		for (int l = 0; l < LightPos.size(); ++l)
-			(*result2)[i] += computeLighting(MyMesh2.vertices[i].p + Vec3Df(Vx2, 0, 0), MyMesh2.vertices[i].n, l, i);
-	}
-}
-
-
 
 /************************************************************
- * Programme principal
- ************************************************************/
+* Programme principal
+************************************************************/
 int main(int argc, char** argv)
 {
-    glutInit (&argc, argv);
+	glutInit(&argc, argv);
 
-    init(argc == 2 ? argv[1] : "DavidHeadCleanMax.obj");
+	background();
+	init();
+	computeLighting();
 
-    // couches du framebuffer utilisees par l'application
-    glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH );
+	// layers of the framebuffer used by the application
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 
-    // position et taille de la fenetre
-    glutInitWindowPosition(200, 100);
-    glutInitWindowSize(W_fen,H_fen);
-    glutCreateWindow(argv[0]);	
+	// position and size of the window
+	glutInitWindowPosition(200, 100);
+	glutInitWindowSize(W_fen, H_fen);
+	glutCreateWindow(argv[0]);
 
-    // Initialisation du point de vue
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glTranslatef(0,0,-4);
-    tbInitTransform();     // initialisation du point de vue
-    tbHelp();                      // affiche l'aide sur la traqueboule
+	// Initializing the viewpoint
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	//////////////////////////////////////////////////////////////
+	// Initial position
+	glTranslatef(-1, -1, -5);
+	glRotatef(10, 1, 0, 0);
+	tbInitTransform();     // initialization viewpoint
+	tbHelp();                      // displays help on traqueboule
 
-    glDisable( GL_LIGHTING );
-    glEnable(GL_COLOR_MATERIAL);
-    glEnable(GL_NORMALIZE);
-    
-    // cablage des callback
-    glutReshapeFunc(reshape);
-    glutKeyboardFunc(keyboard);
-    glutDisplayFunc(display);
-    glutMouseFunc(tbMouseFunc);    // traqueboule utilise la souris
-    glutMotionFunc(tbMotionFunc);  // traqueboule utilise la souris
-    glutIdleFunc(idle);
+	glDisable(GL_LIGHTING);
+	glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_NORMALIZE);
+
+	// wiring of callback
+	glutReshapeFunc(reshape);
+	glutKeyboardFunc(keyboard);
+	glutDisplayFunc(display);
+	glutMouseFunc(tbMouseFunc);    // traqueboule uses the mouse
+	glutMotionFunc(tbMotionFunc);  // traqueboule uses the mouse
+	glutIdleFunc(idle);
 
 
-    // Details sur le mode de trac?
-    glEnable( GL_DEPTH_TEST );            // effectuer le test de profondeur
-    glShadeModel(GL_SMOOTH);
+	// Details on how to stage fright?
+	glEnable(GL_DEPTH_TEST);            // perform depth testing
+	glShadeModel(GL_SMOOTH);
 
-    // Effacer tout
-    glClearColor (BackgroundColor[0],BackgroundColor[1], BackgroundColor[2], 0.0);
-    glClear( GL_COLOR_BUFFER_BIT  | GL_DEPTH_BUFFER_BIT); // la couleur et le z
-   
+	// Clear all
+	glClearColor(BackgroundColor[0], BackgroundColor[1], BackgroundColor[2], 0.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // the color and the z
+
 	initTexture();
 
-    // lancement de la boucle principale
-    glutMainLoop();
+	// start of the main loop
+	glutMainLoop();
 
-    return 0;  // instruction jamais exécutée
+	return 0;  // instruction jamais exécutée
 }
 
 
 /************************************************************
- * Fonctions de gestion opengl ?ne pas toucher
- ************************************************************/
-// Actions d'affichage
-// Ne pas changer
+* Management functions opengl? Do not touch
+************************************************************/
+// Display actions 
+// Do not change
 void display(void)
 {
-    glClear( GL_COLOR_BUFFER_BIT  | GL_DEPTH_BUFFER_BIT); // la couleur et le z
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // la couleur et le z
 
 	glLoadIdentity();  // repere camera
 
-    tbVisuTransform(); // origine et orientation de la scene
+	tbVisuTransform(); // origine et orientation de la scene
 
-    dessiner( );    
+	dessinerBackground();
 
-    glutSwapBuffers();
+	dessinerOther();
+
+	glutSwapBuffers();
 }
 
-// pour changement de taille ou desiconification
+// to change the size or desiconification
 void reshape(int w, int h)
 {
-    glViewport(0, 0, (GLsizei) w, (GLsizei) h);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective (50, (float)w/h, 1, 10);
-    glMatrixMode(GL_MODELVIEW);
+	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	//glTranslatef(0, 0, 3);
+	gluPerspective(50, (float)w / h, 1, 10);
+	glMatrixMode(GL_MODELVIEW);
 }
-
-
-///////////////////////////////////////////////////////////////////////////////////////////
-

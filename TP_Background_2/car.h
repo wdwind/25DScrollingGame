@@ -25,30 +25,31 @@ GLfloat angleUpper = 0;
 GLfloat angleFore = -30;
 GLfloat angleHand = -30;
 GLfloat incrementAngle = .05;
+GLfloat incrementOfrball = 0.3f;
 
 void drawBall(void) {
 
 	glColor3f(0.0, 1.0, 0.0); //set ball colour
 	glPushMatrix();
-	glTranslatef(ballX, ballY, ballZ); //moving it toward the screen a bit on creation
-	//glRotatef(ballX,ballX,ballY,ballZ);
-	glRotatef(rBall, 0, 0, -1);
-	glutSolidSphere(0.2, 10, 10); //create ball.
+		glTranslatef(ballX, ballY, ballZ); //moving it toward the screen a bit on creation
+		//glRotatef(ballX,ballX,ballY,ballZ);
+		glRotatef(rBall, 0, 0, -1);
+		glutSolidSphere(0.2, 10, 10); //create ball.
 	glPopMatrix();
 	glPushMatrix();
-	glTranslatef(ballX + .8, ballY, ballZ); //moving it toward the screen a bit on creation
-	glRotatef(rBall, 0, 0, -1);
-	glutSolidSphere(0.2, 10, 10); //
+		glTranslatef(ballX + .8, ballY, ballZ); //moving it toward the screen a bit on creation
+		glRotatef(rBall, 0, 0, -1);
+		glutSolidSphere(0.2, 10, 10); //
 	glPopMatrix();
 	glPushMatrix();
-	glTranslatef(ballX, ballY, ballZ + .5); //moving it toward the screen a bit on creation
-	glRotatef(rBall, 0, 0, -1);
-	glutSolidSphere(0.2, 10, 10); //
+		glTranslatef(ballX, ballY, ballZ + .5); //moving it toward the screen a bit on creation
+		glRotatef(rBall, 0, 0, -1);
+		glutSolidSphere(0.2, 10, 10); //
 	glPopMatrix();
 	glPushMatrix();
-	glTranslatef(ballX + .8, ballY, ballZ + .5); //moving it toward the screen a bit on creation
-	glRotatef(rBall, 0, 0, -1);
-	glutSolidSphere(0.2, 10, 10); //
+		glTranslatef(ballX + .8, ballY, ballZ + .5); //moving it toward the screen a bit on creation
+		glRotatef(rBall, 0, 0, -1);
+		glutSolidSphere(0.2, 10, 10); //
 	glPopMatrix();
 
 }
@@ -61,10 +62,10 @@ void drawUnitFace()
 	glColor3f(1, 1, 0);
 	glNormal3f(1, 1, 1);
 	glBegin(GL_QUADS);
-	glVertex3f(0, 0, .5);
-	glVertex3f(0, .5, .5);
-	glVertex3f(.5, .5, .5);
-	glVertex3f(.5, 0, .5);
+		glVertex3f(0, 0, .5);
+		glVertex3f(0, .5, .5);
+		glVertex3f(.5, .5, .5);
+		glVertex3f(.5, 0, .5);
 	glEnd();
 
 }
@@ -117,14 +118,14 @@ void drawCar()
 {
 	glPushMatrix(); //draw the car body
 		glScalef(2, 1, 1);
-		glNormal3f(1, 2, 0);
+		//glNormal3f(1, 2, 0);
 		drawUnitCube();
 	glPushMatrix(); //draw the canon
 		glTranslatef(0.5, 0.5, 0.5);
 		drawBullet();
 		glRotatef(rCanon, 0, 0, -1); //control the canon
 		glScalef(1.2, 0.3, 0.3);
-		glNormal3f(1, 2, 0);
+		//glNormal3f(1, 2, 0);
 		drawUnitCube();
 		drawBall(); //draw the wheels
 	glPopMatrix();
@@ -141,6 +142,14 @@ void canonCounter(){
 	if (rCanon > -45 && rCanon <= 0){
 		rCanon -= 3;
 	}
+}
+
+void drawEnemy(){
+	glPushMatrix();
+		glTranslatef(3, 0, 0);
+		glScalef(2, 2, 2);
+		drawUnitFace();
+	glPopMatrix();
 }
 
 #endif

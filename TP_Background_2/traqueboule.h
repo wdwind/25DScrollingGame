@@ -15,7 +15,7 @@ static const float speedfact = 0.2;
 /** votre fonction d'affichage */
 void display();
 
-/** Placement de la scene par rapport a la camera */
+/** Placement of the stage relative to the camera */
 GLdouble tb_matrix[16] =   { 1,0,0,0,
                              0,1,0,0,
                              0,0,1,0,
