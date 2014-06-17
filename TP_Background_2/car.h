@@ -12,6 +12,7 @@ Draw car.
 #include <math.h>
 #include <iostream>
 #include "bullet.h"
+#include "texture.h"
 
 //static const float mf[] = { (float)0.03, (float)0.1, (float)0.23 };
 //std::vector<float> PositionBullet(mf, mf + sizeof(mf) / sizeof(float));
@@ -20,9 +21,30 @@ class Car{
 public:
 	Car(){
 		PositionBullet = { (float)0.03, (float)0.1, (float)0.23 };
+
+		sphere = gluNewQuadric();
+		gluQuadricDrawStyle(sphere, GLU_FILL);
+		gluQuadricTexture(sphere, GL_TRUE);
+		gluQuadricNormals(sphere, GLU_SMOOTH);
 	};
 
+	Car(Vec3Df defaultT){
+		PositionBullet = { (float)0.03, (float)0.1, (float)0.23 };
+
+		sphere = gluNewQuadric();
+		gluQuadricDrawStyle(sphere, GLU_FILL);
+		gluQuadricTexture(sphere, GL_TRUE);
+		gluQuadricNormals(sphere, GLU_SMOOTH);
+
+		translate = defaultT;
+	};
+
+	Vec3Df translate = Vec3Df(0, 0, 0);
+
+	GLUquadricObj *sphere = NULL;
+
 	GLfloat rCanon = 0.0f;
+	GLfloat rBall = 0.0f;
 
 	std::vector<float> PositionBullet;
 	 //= { (float)0.03, (float)0.1, (float)0.23 };
@@ -39,41 +61,44 @@ public:
 	//GLfloat angleFore = -30;
 	//GLfloat angleHand = -30;
 	//GLfloat incrementAngle = .05;
-	//GLfloat incrementOfrball = 0.3f;
+	GLfloat incrementOfrball = 2.8f;
 
 	void drawBall(void) {
 		float ballX = 0.1f;
 		float ballY = 0.1f;
 		float ballZ = 0.5f;
 
-		GLfloat rBall = 0.0f;
+		glColor3f(1.0, 1.0, 1.0); //set ball colour
 
-		glColor3f(0.0, 1.0, 0.0); //set ball colour
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, Texture[5]);
 
 		glPushMatrix();
 			glTranslatef(ballX, ballY, ballZ); //moving it toward the screen a bit on creation
 			glRotatef(rBall, 0, 0, -1);
-			glutSolidSphere(0.2, 10, 10); //create ball.
+			gluSphere(sphere, .2, 10, 10); //create ball.
 		glPopMatrix();
 
 		glPushMatrix();
 			glTranslatef(ballX + .8, ballY, ballZ); //moving it toward the screen a bit on creation
 			glRotatef(rBall, 0, 0, -1);
-			glutSolidSphere(0.2, 10, 10); //
+			gluSphere(sphere, .2, 10, 10); //
 		glPopMatrix();
 
 		glPushMatrix();
 			glTranslatef(ballX, ballY, ballZ + .5); //moving it toward the screen a bit on creation
 			glRotatef(rBall, 0, 0, -1);
-			glutSolidSphere(0.2, 10, 10); //
+			gluSphere(sphere, .2, 10, 10); //
 		glPopMatrix();
 
 		glPushMatrix();
 			glTranslatef(ballX + .8, ballY, ballZ + .5); //moving it toward the screen a bit on creation
 			glRotatef(rBall, 0, 0, -1);
-			glutSolidSphere(0.2, 10, 10); //
+			gluSphere(sphere, .2, 10, 10); //
 		glPopMatrix();
 
+		glBindTexture(GL_TEXTURE_2D, 2);
+		glDisable(GL_TEXTURE_2D);
 	}
 
 	void drawUnitFace()
@@ -81,13 +106,17 @@ public:
 		//1) draw a unit quad in the x,y plane oriented along the z axis
 		//2) make sure the orientation of the vertices is positive (counterclock wise)
 		//3) What happens if the order is inversed?
-		glColor3f(1, 1, 0);
+		//glColor3f(1, 1, 0);
 		glNormal3f(0, 0, -1);
 
 		glBegin(GL_QUADS);
+			glTexCoord2f(0, 0);
 			glVertex3f(0, 0, .5);
+			glTexCoord2f(0, 2);
 			glVertex3f(0, .5, .5);
+			glTexCoord2f(4, 2);
 			glVertex3f(.5, .5, .5);
+			glTexCoord2f(4, 0);
 			glVertex3f(.5, 0, .5);
 		glEnd();
 
@@ -143,21 +172,33 @@ public:
 		glPopMatrix();
 	}
 
+	void updateBullets(){
+		for (int i = 0; i < bullets.size(); i++)
+		{
+			bullets[i].translate = translate;
+		}
+	}
+
 	void shotBullet(){
 		if (bullets.empty())
 		{
 			bullets.push_back(Bullet());
 			bullets.back().origin = Vec3Df(PositionBullet[0] + 0.5, PositionBullet[1] + 0.5, PositionBullet[2] + 0.5);
 			bullets.back().theta = rCanon;
+			bullets.back().translate = translate;
 		}
+
+		updateBullets();
 
 		//bullets.end()->speed = 0.05;
 		bullets.back().origin = Vec3Df(PositionBullet[0] + 0.5, PositionBullet[1] + 0.5, PositionBullet[2] + 0.5);
+		bullets.back().translate = translate;
 		bullets.back().theta = rCanon;
 		bullets.back().shot = true;
 
 		bullets.push_back(Bullet());
 		bullets.back().origin = Vec3Df(PositionBullet[0] + 0.5, PositionBullet[1] + 0.5, PositionBullet[2] + 0.5);
+		bullets.back().translate = translate;
 		bullets.back().theta = rCanon;
 		bullets.back().drawBullet();
 	}
@@ -167,6 +208,7 @@ public:
 		{
 			bullets.push_back(Bullet());
 			bullets.back().origin = Vec3Df(PositionBullet[0] + 0.5, PositionBullet[1] + 0.5, PositionBullet[2] + 0.5);
+			bullets.back().translate = translate;
 			bullets.back().theta = rCanon;
 		}
 
@@ -194,8 +236,16 @@ public:
 		drawBullet2();
 
 		glPushMatrix(); //draw the car body
+			glColor3f(1, 1, 1);
+
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, Texture[showText]);
+
 			glScalef(2, 1, 1);
 			drawUnitCube();
+
+			glBindTexture(GL_TEXTURE_2D, 2);
+			glDisable(GL_TEXTURE_2D);
 
 		glPushMatrix(); //draw the canon
 			glTranslatef(0.5, 0.5, 0.5);
@@ -205,16 +255,22 @@ public:
 		//temp1.theta = rCanon;
 
 		//drawBullet2();
-		
+			
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, Texture[showText]);
+
 			glRotatef(rCanon, 0, 0, -1); //control the canon
 			glScalef(1.2, 0.3, 0.3);
 			//glNormal3f(1, 2, 0);
 			drawUnitCube();
+
+			glBindTexture(GL_TEXTURE_2D, 2);
+			glDisable(GL_TEXTURE_2D);
+
 			drawBall(); //draw the wheels
 		
 		glPopMatrix();
 		glPopMatrix();
-
 	}
 
 	void canonClock(){

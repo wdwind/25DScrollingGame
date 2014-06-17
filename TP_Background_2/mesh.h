@@ -3,6 +3,7 @@
 
 #include "Vertex.h"
 #include <vector>
+#include "light.h"
 
 /************************************************************
  * Class de triangle de base
@@ -32,6 +33,8 @@ public:
     unsigned int v[3];
 };
 
+enum Mode{ ORIGINAL_LIGHTING = 0, DIFFUSE_LIGHTING, SPECULAR_LIGHTING, COMBINED_LIGHTING, TOON_LIGHTING };
+
 /************************************************************
  * Class de maillage basique
  ************************************************************/
@@ -57,6 +60,7 @@ public:
 	void drawSomeP();
     void computeBoundingCube();
 	int getClosestVertexIndex(const Vec3Df & origin, const Vec3Df & direction);
+	static Vec3Df computeLighting(Vec3Df & vertexPos, Vec3Df & normal, Light light, Vec3Df & CamPos, Mode mode);
 
 	//void setLighting(std::vector<Vec3Df> & l) { lighting = l;};
 	//void setTranslate(Vec3Df t) { translate = t; };
@@ -65,7 +69,7 @@ public:
 	//Vec3Df getTranslate() { return translate; }
 
     //Bounding box information
-    Vec3Df bbMinPos;
+    Vec3Df bbOrigin;
     float bbEdgeSize;
 
 	std::vector<Vec3Df> lighting;

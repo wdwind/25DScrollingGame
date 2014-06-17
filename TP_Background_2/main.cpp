@@ -13,223 +13,16 @@
 #include "utils.h"
 #include "enemy.h"
 #include "bullet.h"
+#include "light.h"
+#include "texture.h"
 
 using namespace std;
 
 // Functions
 void computeLighting();
-void dealWithUserInput(int x, int y);
-void initTexture();
 void keyboard(unsigned char key, int x, int y);
 void display(void);
 void reshape(int w, int h);
-
-// Basic variables
-unsigned int W_fen = 800;  // largeur fenetre
-unsigned int H_fen = 800;  // hauteur fenetre
-
-std::vector<GLuint> Texture;
-std::vector<Mesh> meshes;
-std::vector<Enemy> enemies;
-Car car = Car();
-//Bullet b;
-
-// Test
-GLUquadricObj *sphere = NULL;
-
-//std::vector<Bullet> bullets;
-
-int enemyIndex = 4;
-
-//std::vector<Vec3Df> lighting;
-//std::vector<Vec3Df> lighting2;
-//std::vector<Vec3Df> lighting3;
-
-//Background color
-float BackgroundColor[]={0,0,0};
-// Different display modes
-enum Mode{ ORIGINAL_LIGHTING=0, DIFFUSE_LIGHTING, SPECULAR_LIGHTING, COMBINED_LIGHTING, TOON_LIGHTING};
-//Currently active mode
-Mode mode = COMBINED_LIGHTING;
-
-//if the program runs too slow, change this to false.
-//to compute a result, you then need to press 'u'
-bool updateAlways=true;
-
-//There are several light positions and you can later add light sources
-//for the moment, just work with LightPos[0]
-//to set the light position to the camera location, you can use 'l'
-std::vector<Vec3Df> LightPos;
-//Later in the exercise, you can also modify and use a special color per light source.
-//The LightColor array is used for this purpose:
-std::vector<Vec3Df> LightColor;
-//the current light
-int SelectedLight=0;
-
-//The position of the camera
-//this variable will be updated by the program! Do not change it manually!
-//Of course, you can USE its value
-Vec3Df CamPos;// = Vec3Df(0.0f, 0.0f, -4.0f);
-
-
-//Pressing 's' will display the currently chosen vertex
-bool ShowSelectedVertex=false;
-
-//The index of the chosen vertex is stored in this variable
-//the value is -1 if no vertex is chosen
-//to choose a vertex, hover over it and press space
-int SelectedVertex=-1;
-
-//per vertex attributes, useful for materials - see later exercises
-//std::vector<Vec3Df> MeshMaterial;
-
-float lightPower = 8;
-float s = 5;
-float showDot = true;
-
-
-int NbVertX = 9;
-int NbVertY = 5;
-float qurdSize = 1;
-
-float Vx1 = -3;
-float Vx2 = (NbVertX - 1)*qurdSize + Vx1;
-float threshold = -11;
-
-int showText = 2;
-int temp = showText;
-bool drawN = false;
-bool drawC = false;
-float backgroundSpeed = 0.005;
-
-Vec3Df defaultLightPos = Vec3Df(2, 3, 0);
-
-bool shot = false;
-bool temp1 = false;
-bool temp2 = false;
-bool temp3 = true;
-
-bool drawB = false;
-
-float mv[16];
-
-//Lighting of the model (you should not need to touch this one...
-
-
-template <typename T>
-T clip(const T& n, const T& lower, const T& upper) {
-	return max(lower, min(n, upper));
-}
-
-//this is the MAIN function in which you have to work
-//it is automatically iterated over the entire mesh and all light sources (light is the current light index)
-//it receives the current vertex location, its normal, and the index of the current vertex (yes, this is somewhat redundant because the mesh  
-Vec3Df computeLighting(Vec3Df & vertexPos, Vec3Df & normal, unsigned int light, unsigned int index)
-{
-	Vec3Df MaterialDiffuseColor = Vec3Df(1, 1, 1);
-	Vec3Df MaterialAmbientColor = 0 * MaterialDiffuseColor;
-
-	//do not change any global variables here! This function will be called for EACH vertex 
-	//of the mesh, so your change would happen several times
-	switch(mode)
-	{
-	case ORIGINAL_LIGHTING:
-		{
-			return Vec3Df(1,1,1);
-		}
-	case DIFFUSE_LIGHTING:
-		{
-			Vec3Df lightDir = (LightPos[light] - vertexPos).unit();
-			float distance = (LightPos[light] - vertexPos).getSquaredLength();
-			float intensity1 = Vec3Df::dotProduct(normal, lightDir);
-			intensity1 = clip(Vec3Df::dotProduct(normal, lightDir), (float)0, (float)1);
-
-			//lightDir = lightDir.unit();
-			//clip(1, 2, 3);
-			//Vec3Df test = LightColor[light];
-			//test = Vec3Df::dotProduct(normal, currentLight)*LightColor[light];
-
-			return lightPower*intensity1*LightColor[light] / distance + MaterialAmbientColor;
-		}
-	case SPECULAR_LIGHTING:
-		{
-			Vec3Df lightDir = (LightPos[light] - vertexPos).unit();
-			float distance = (LightPos[light] - vertexPos).getSquaredLength();
-			Vec3Df camDir = (CamPos - vertexPos).unit();
-			Vec3Df H = (camDir + lightDir).unit();
-			float NdotH = Vec3Df::dotProduct(normal, H);
-
-			NdotH = clip(NdotH, (float)0, (float)1);
-
-			float intensity2 = pow(NdotH, s);
-
-			return lightPower*intensity2*LightColor[light] / distance + MaterialAmbientColor;
-		}
-	case COMBINED_LIGHTING:
-		{
-			Vec3Df lightDir = (LightPos[light] - vertexPos).unit();
-			float intensity1 = clip(Vec3Df::dotProduct(normal, lightDir), (float)0, (float)1);
-
-			// need to divide distance???
-			float distance = (LightPos[light] - vertexPos).getSquaredLength();
-			//distance = 1;
-
-			Vec3Df camDir = (CamPos - vertexPos).unit();
-			Vec3Df H = (camDir + lightDir).unit();
-			float NdotH = Vec3Df::dotProduct(normal, H);
-			NdotH = clip(NdotH, (float)0, (float)1);
-			float intensity2 = pow(NdotH, s);
-
-			//cout << distance << endl;
-
-			return lightPower*(intensity2*LightColor[light] + intensity1*LightColor[light]) / (distance)+MaterialAmbientColor;
-		}
-	case TOON_LIGHTING:
-		{
-			Vec3Df lightDir = (LightPos[light] - vertexPos).unit();
-			float intensity1 = Vec3Df::dotProduct(normal, lightDir);
-			intensity1 = clip(Vec3Df::dotProduct(normal, lightDir), (float)0, (float)1);
-
-			float distance = (LightPos[light] - vertexPos).getSquaredLength();
-
-			//cout << Vec3Df::dotProduct(normal, lightDir) << endl;
-			float threshold = 0.5;
-			float temp = 0;
-			if (Vec3Df::dotProduct(normal, lightDir) > threshold)
-			{
-				temp = 0.7;
-			}
-			else
-			{
-				temp = 0;
-			}
-
-
-			//int s = 8;
-			Vec3Df camDir = (CamPos - vertexPos).unit();
-			Vec3Df H = (camDir + lightDir).unit();
-			float NdotH = Vec3Df::dotProduct(normal, H);
-			NdotH = clip(NdotH, (float)0, (float)1);
-			float intensity2 = pow(NdotH, s);
-
-			float temp2 = 0;
-			float threshold2 = 0.7;
-			if (intensity2 > threshold2)
-			{
-				temp2 = 0.7;
-			}
-			else
-			{
-				temp2 = 0;
-			}
-
-			return (temp * LightColor[light] + temp2 * LightColor[light]) * lightPower / distance + MaterialAmbientColor;
-		}
-
-	default:
-		return Vec3Df(0,1,0);
-	}
-}
 
 void computeLighting()
 {
@@ -241,7 +34,7 @@ void computeLighting()
 		{
 			(*result)[i] = Vec3Df();
 			for (int l = 0; l < LightPos.size(); ++l)
-				(*result)[i] += computeLighting(meshes[j].vertices[i].p + meshes[j].translate, meshes[j].vertices[i].n, l, i);
+				(*result)[i] += Mesh::computeLighting(meshes[j].vertices[i].p + meshes[j].translate, meshes[j].vertices[i].n, light, CamPos, mode);
 		}
 	}
 
@@ -253,50 +46,106 @@ void computeLighting()
 		{
 			(*result)[i] = Vec3Df();
 			for (int l = 0; l < LightPos.size(); ++l)
-				(*result)[i] += computeLighting(enemies[j].vertices[i].p + enemies[j].translate, enemies[j].vertices[i].n, l, i);
+				(*result)[i] += Mesh::computeLighting(enemies[j].vertices[i].p + enemies[j].translate, enemies[j].vertices[i].n, light, CamPos, mode);
 		}
 	}
 }
 
 
-void collisionDetect(Vec3Df start){
-	glBegin(GL_LINES);
-	glPushMatrix();
-	glColor3f(1, 0, 0);
-	glVertex3f(0, 0, 0);
-	glVertex3f(0.5 + car.PositionBullet[0], 0.5 + car.PositionBullet[1], 0.5 + car.PositionBullet[2]);
-	glPopMatrix();
-	glEnd();
-
-	int t;
-	for (int i = 0; i < meshes[enemyIndex].triangles.size(); i++)
-	{
-		Vec3Df* vv;
-		Vec3Df t1 = meshes[enemyIndex].vertices[meshes[enemyIndex].triangles[i].v[0]].p;
-		Vec3Df t2 = meshes[enemyIndex].vertices[meshes[enemyIndex].triangles[i].v[1]].p;
-		Vec3Df t3 = meshes[enemyIndex].vertices[meshes[enemyIndex].triangles[i].v[2]].p;
-		RealTriangle rt = RealTriangle(t1, t2, t3);
-		t = intersect3D_RayTriangle(Vec3Df(car.PositionBullet[0], car.PositionBullet[1], car.PositionBullet[2]), Vec3Df(car.PositionBullet[0] + 10, car.PositionBullet[1], car.PositionBullet[2]), rt);
-
-		if (t==1)
-			cout << t << endl;
-	}
-	
-}
+//void collisionDetect(Vec3Df start){
+//	glBegin(GL_LINES);
+//	glPushMatrix();
+//	glColor3f(1, 0, 0);
+//	glVertex3f(0, 0, 0);
+//	glVertex3f(0.5 + car.PositionBullet[0], 0.5 + car.PositionBullet[1], 0.5 + car.PositionBullet[2]);
+//	glPopMatrix();
+//	glEnd();
+//
+//	int t;
+//	for (int i = 0; i < meshes[enemyIndex].triangles.size(); i++)
+//	{
+//		Vec3Df* vv;
+//		Vec3Df t1 = meshes[enemyIndex].vertices[meshes[enemyIndex].triangles[i].v[0]].p;
+//		Vec3Df t2 = meshes[enemyIndex].vertices[meshes[enemyIndex].triangles[i].v[1]].p;
+//		Vec3Df t3 = meshes[enemyIndex].vertices[meshes[enemyIndex].triangles[i].v[2]].p;
+//		RealTriangle rt = RealTriangle(t1, t2, t3);
+//		t = intersect3D_RayTriangle(Vec3Df(car.PositionBullet[0], car.PositionBullet[1], car.PositionBullet[2]), Vec3Df(car.PositionBullet[0] + 10, car.PositionBullet[1], car.PositionBullet[2]), rt);
+//
+//		if (t==1)
+//			cout << t << endl;
+//	}
+//}
 
 void collisionDetect2(){
-	for (int i = 0; i < car.bullets.size(); i++)
-	{
-		for (int j = 0; j < enemies.size(); j++)
-		{
-			Vec3Df bPos = car.bullets[i].getCurrentPos();
-			Vec3Df ePos = enemies[j].getCurrentPos();
+	//for (int i = 0; i < car.bullets.size(); i++)
+	//{
+	//	for (int j = 0; j < enemies.size(); j++)
+	//	{
+	//		Vec3Df bPos = car.bullets[i].getCurrentPos();
+	//		Vec3Df ePos = enemies[j].getCurrentPos();
 
-			if ((bPos - ePos).getLength() <= enemies[j].maxDist)
+	//		if ((bPos - ePos).getLength() <= enemies[j].maxDist)
+	//		{
+	//			car.bullets.erase(car.bullets.begin() + i);
+	//			//enemies.erase(enemies.begin() + j);
+	//			if (!enemies[j].Shot())
+	//			{
+	//				enemies.erase(enemies.begin() + j);
+	//				destroyedE++;
+	//			}
+	//		}
+	//	}
+	//}
+	
+	for (vector<Enemy>::iterator it2 = enemies.begin(); it2 != enemies.end();)
+	{
+		if (it2->disappear)
+		{
+			it2 = enemies.erase(it2);
+			destroyedE++;
+		}
+		else
+			++it2;
+	}
+
+	for (vector<Bullet>::iterator it1 = car.bullets.begin(); it1 != car.bullets.end();)
+	{
+		bool match = false;
+		for (vector<Enemy>::iterator it2 = enemies.begin(); it2 != enemies.end();)
+		{
+			Vec3Df bPos = it1->getCurrentPos();
+			Vec3Df ePos = it2->getCurrentPos();
+
+			if (!it2->Explode && (bPos - ePos).getLength() < it2->maxDist)
 			{
-				car.bullets.erase(car.bullets.begin() + i);
-				enemies.erase(enemies.begin() + j);
+				match = true;
+				// it1 = car.bullets.erase(it1);
+				//enemies.erase(enemies.begin() + j);
+				if (!it2->Shot())
+				{
+					it2->explode();
+					//it2 = enemies.erase(it2);
+					//destroyedE++;
+				}
+				/*if (it2->disappear)
+				{
+					it2 = enemies.erase(it2);
+					destroyedE++;
+				}*/
+				break;
 			}
+			else
+			{
+				++it2;
+			}
+		}
+		if (match)
+		{
+			it1 = car.bullets.erase(it1);
+		}
+		else
+		{
+			++it1;
 		}
 	}
 }
@@ -309,9 +158,11 @@ void animate()
 	Vx1 -= backgroundSpeed;
 	Vx2 -= backgroundSpeed;
 
-	if (temp3){
-		//car.rBall += car.incrementOfrball;
-	}
+	//if (carMove){
+	//	car.rBall += car.incrementOfrball;
+	//}
+
+	car.rBall += car.incrementOfrball;
 
 	/*if (temp1) {
 		int t = 1;
@@ -337,17 +188,6 @@ void animate()
 }
 
 
-
-//Everything below, you do NOT have to read!!!
-//________________________________
-//________________________________
-//________________________________
-//________________________________
-//________________________________
-
-
-
-
 /************************************************************
  * Function to initialize the mesh
  ************************************************************/
@@ -356,8 +196,13 @@ void init(){
 	//this function loads a mesh
 	Enemy enemy;
 	enemy.loadMesh("enemy.obj");
-	enemy.translate = Vec3Df(4, 0.5, 1);
+	enemy.translate = enemyStartPos;
 	enemies.push_back(enemy);
+
+	Enemy enemy2;
+	enemy2.loadMesh("enemy.obj");
+	enemy2.translate = enemyStartPos2;
+	enemies.push_back(enemy2);
 
 	sphere = gluNewQuadric();
 	gluQuadricDrawStyle(sphere, GLU_FILL);
@@ -369,11 +214,76 @@ void init(){
 	//	MeshMaterial[i]=Vec3Df(0,0,0);
 		
 	LightPos.push_back(defaultLightPos);
-	LightColor.push_back(Vec3Df(1,1,1));
+	LightColor.push_back(defaultLightColor);
+
+	light = Light(defaultLightPos, defaultLightColor, lightPower, s);
 	//computeLighting();
 }
 
+void background(){
+	Mesh MyMesh;
+	std::vector<Vec3Df> lighting;
 
+	MyMesh.loadMesh(NbVertX, NbVertY, qurdSize);
+	lighting.resize(MyMesh.vertices.size());
+
+	Mesh MyMesh2;
+	std::vector<Vec3Df> lighting2;
+
+	MyMesh2.loadMesh(NbVertX, NbVertY, qurdSize);
+	lighting2.resize(MyMesh2.vertices.size());
+
+	Mesh MyMesh3;
+	std::vector<Vec3Df> lighting3;
+
+	MyMesh3.loadRoad(NbVertX, 2, qurdSize, 4);
+	lighting3.resize(MyMesh3.vertices.size());
+
+	Mesh MyMesh4;
+	std::vector<Vec3Df> lighting4;
+
+	MyMesh4.loadRoad(NbVertX, 2, qurdSize, 4);
+	lighting4.resize(MyMesh4.vertices.size());
+
+	meshes.push_back(MyMesh);
+	meshes.push_back(MyMesh2);
+	meshes.push_back(MyMesh3);
+	meshes.push_back(MyMesh4);
+
+	meshes[0].lighting = lighting;
+	meshes[1].lighting = lighting2;
+	meshes[2].lighting = lighting3;
+	meshes[3].lighting = lighting4;
+}
+
+void dessinerBackground();
+void dessinerOther();
+void drawBoss();
+
+/************************************************************
+* Management functions opengl? Do not touch
+************************************************************/
+// Display actions 
+// Do not change
+void display(void)
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // la couleur et le z
+
+	glLoadIdentity();  // repere camera
+
+	tbVisuTransform(); // origine et orientation de la scene
+
+	dessinerBackground();
+
+	dessinerOther();
+
+	if (boss)
+	{
+		drawBoss();
+	}
+
+	glutSwapBuffers();
+}
 
 /************************************************************
  * Call different drawing functions
@@ -382,18 +292,29 @@ void dessinerBackground()
 {
 	glPointSize(10);
 
-	// Draw light
+	// Draw SUN
 	glPushMatrix();
-		glColor3f(1, 0, 0);
-		glTranslatef(LightPos[0][0], LightPos[0][1], LightPos[0][2]);
-		glutSolidSphere(.5, 50, 50);
-	glPopMatrix();
 
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, Texture[1]);
-		//gluSphere(sphere, 5.0, 20, 20);
+	glBindTexture(GL_TEXTURE_2D, Texture[2]);
+		glColor3f(1, 0, 0);
+		glTranslatef(LightPos[0][0], LightPos[0][1], LightPos[0][2]);
+		gluSphere(sphere, .5, 50, 50);
 	glBindTexture(GL_TEXTURE_2D, 2);
 	glDisable(GL_TEXTURE_2D);
+
+	glPopMatrix();
+
+	
+
+	if (boss)
+	{
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, Texture[1]);
+		gluSphere(sphere, 5.0, 20, 20);
+		glBindTexture(GL_TEXTURE_2D, 2);
+		glDisable(GL_TEXTURE_2D);
+	}
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, Texture[0]);
@@ -402,39 +323,73 @@ void dessinerBackground()
 	glBindTexture(GL_TEXTURE_2D, 2);
 	glDisable(GL_TEXTURE_2D);
 
-	glPushMatrix();
-	glTranslated(0.5, 0.5, 0.5);
-	/*b = Bullet(Vec3Df(0.5, 0.5, 0.5));
-	b.drawBullet();*/
-	glPopMatrix();
-
 	// Draw distant view
 	glPushMatrix();
-		glColor3f(0, 0, 1);
+
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, Texture[11]);
+
+		glColor3f(1, 1, 1);
 		glTranslatef(-5, 0, -5);
 		glNormal3f(0, 0, 1);
 		//glScalef(40, 40, 40);
 
 		glBegin(GL_QUADS);
-			glVertex3f(0, 0, 0);
-			glVertex3f(12, 0, 0);
-			glVertex3f(12, 10, 0);
-			glVertex3f(0, 10, 0);
+			glTexCoord2f(0, 0);
+			glVertex3f(-5, 0, 0);
+			glTexCoord2f(1, 0);
+			glVertex3f(15, 0, 0);
+			glTexCoord2f(1, 1);
+			glVertex3f(15, 6, 0);
+			glTexCoord2f(0, 1);
+			glVertex3f(-5, 6, 0);
 		glEnd();
+
+		glBindTexture(GL_TEXTURE_2D, 2);
+		glDisable(GL_TEXTURE_2D);
+
 	glPopMatrix();
+
+
+	// Draw front view
+	//glPushMatrix();
+
+	//	glEnable(GL_TEXTURE_2D);
+	//	glBindTexture(GL_TEXTURE_2D, Texture[showText]);
+
+	//	glColor3f(1, 1, 1);
+	//	glTranslatef(-5, 0, 2);
+	//	glNormal3f(0, 0, 1);
+	//	//glScalef(40, 40, 40);
+
+	//	glBegin(GL_QUADS);
+	//	glTexCoord2f(-5, 0);
+	//	glVertex3f(-5, 0, 0);
+	//	glTexCoord2f(-5, -1);
+	//	glVertex3f(-5, -1, 0);
+	//	glTexCoord2f(15, -1);
+	//	glVertex3f(15, -1, 0);
+	//	glTexCoord2f(15, 0);
+	//	glVertex3f(15, 0, 0);
+	//	glEnd();
+
+	//	glBindTexture(GL_TEXTURE_2D, 2);
+	//	glDisable(GL_TEXTURE_2D);
+
+	//glPopMatrix();
 
 	switch( mode )
     {
     case ORIGINAL_LIGHTING:
 		{
 			Vec3Df p;
-			if (ShowSelectedVertex&&SelectedVertex>=0)
-			{
-				p=meshes[0].vertices[SelectedVertex].p;
-				glBegin(GL_POINTS);
-				glVertex3f(p[0],p[1],p[2]);
-				glEnd();
-			}
+			//if (ShowSelectedVertex&&SelectedVertex>=0)
+			//{
+			//	p=meshes[0].vertices[SelectedVertex].p;
+			//	glBegin(GL_POINTS);
+			//	glVertex3f(p[0],p[1],p[2]);
+			//	glEnd();
+			//}
 
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, Texture[showText]);
@@ -487,18 +442,24 @@ void dessinerBackground()
 
 
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, Texture[1]);
+		glBindTexture(GL_TEXTURE_2D, Texture[8]);
 
 		glPushMatrix();
 			glTranslatef(Vx1, 0, -2);
-			meshes[2].drawWithColors();
+			meshes[2].draw();
 			meshes[2].drawNormals();
 			meshes[2].translate = Vec3Df(Vx1, 0, -2);
 		glPopMatrix();
 
+		glBindTexture(GL_TEXTURE_2D, 2);
+		glDisable(GL_TEXTURE_2D);
+
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, Texture[8]);
+
 		glPushMatrix();
 			glTranslatef(Vx2, 0, -2);
-			meshes[3].drawWithColors();
+			meshes[3].draw();
 			meshes[3].drawNormals();
 			meshes[3].translate = Vec3Df(Vx2, 0, -2);
 		glPopMatrix();
@@ -514,7 +475,7 @@ void dessinerOther(){
 
 	for (int i = 0; i < enemies.size(); i++)
 	{
-		enemies[i].move();
+		//enemies[i].move();
 		enemies[i].drawCurrentPos();
 		glPushMatrix();
 			glTranslatef(enemies[i].translate[0], enemies[i].translate[1], enemies[i].translate[2]);
@@ -530,41 +491,149 @@ void dessinerOther(){
 
 	//b.drawCurrentPos();
 
-	if (drawC)
-		car.drawCar();
+	//glEnable(GL_TEXTURE_2D);
+	//glBindTexture(GL_TEXTURE_2D, Texture[4]);
+	glPushMatrix();
+		glTranslatef(car.translate[0], car.translate[1], car.translate[2]);
 
-	//if (shot){
-	//	if (car.PositionBullet[0] < 6){
-	//		car.PositionBullet[0] += 0.003;
-	//		//car.temp1.drawCurrentPos();
+		if (drawC)
+			car.drawCar();
 
-	//		/*glPushMatrix();
-	//		glTranslatef(car.PositionBullet[0], 0, 0);
-	//		b.drawBullet();
-	//		glPopMatrix();*/
-	//	}
-	//	else if (car.PositionBullet[0] >= 6){
-	//		car.PositionBullet[0] = 0.03;
-	//		//car.temp1.drawCurrentPos();
+	glPopMatrix();
 
-	//		/*glPushMatrix();
-	//		glTranslatef(car.PositionBullet[0], 0, 0);
-	//		b.drawBullet();
-	//		glPopMatrix();*/
-	//	}
-	//}
+	//glBindTexture(GL_TEXTURE_2D, 2);
+	//glDisable(GL_TEXTURE_2D);
+}
 
-	if (drawB)
-		collisionDetect(Vec3Df(0, 0, 1));
+void drawBoss(){
+	if (Boss.vertices.empty())
+	{
+		std::vector<Vec3Df> lighting;
+		Boss.loadMesh("monster.obj");
+		lighting.resize(Boss.vertices.size());
+		Boss.lighting = lighting;
+		Boss.translate = bossStartPos;
+		cout << "Start loading BOSS!!!" << endl;
+	}
 
+	glPushMatrix();
+		
+		glTranslatef(bossStartPos[0], bossStartPos[1], bossStartPos[2]);
+		glRotatef(90, 0, -1, 0);
+
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, Texture[showText]);
+		Boss.draw();
+		glBindTexture(GL_TEXTURE_2D, 2);
+		glDisable(GL_TEXTURE_2D);
+
+	glPopMatrix();
+}
+
+void enemiesType();
+
+void idle()
+{
+	CamPos=getCameraPosition();
+
+	if (updateAlways)
+		computeLighting();
+
+	collisionDetect2();
+
+	enemiesType();
+
+	glutPostRedisplay();
+	animate();
+}
+
+void enemiesType(){
+	if (enemies.size() < 2 && destroyedE < 20)
+	{
+		Enemy enemy;
+		enemy.loadMesh("enemy.obj");
+		enemy.translate = enemyStartPos;
+		enemies.push_back(enemy);
+	}
+	if (destroyedE > 3)
+	{
+		destroyedE = 100;
+		enemies.clear();
+		boss = true;
+	}
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////////////
+/************************************************************
+* Programme principal
+************************************************************/
+int main(int argc, char** argv)
+{
+	glutInit(&argc, argv);
 
-// prise en compte du clavier
-//Vous allez ajouter quelques fonctionalites pendant le TP
-//ce qui est important pour vous: key contient le caractère correspondant ?la touche appuy?par l'utilisateur
+	background();
+	init();
+	computeLighting();
+
+	// layers of the framebuffer used by the application
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+
+	// position and size of the window
+	glutInitWindowPosition(0, 50);
+	glutInitWindowSize(W_fen, H_fen);
+	glutCreateWindow(argv[0]);
+
+	// Initializing the viewpoint
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	//////////////////////////////////////////////////////////////
+	// Initial position
+	glTranslatef(-1, -1.2, -5);
+	glRotatef(4, 1, 0, 0);
+	tbInitTransform();     // initialization viewpoint
+	tbHelp();                      // displays help on traqueboule
+
+	glDisable(GL_LIGHTING);
+	glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_NORMALIZE);
+
+	// wiring of callback
+	glutReshapeFunc(reshape);
+	glutKeyboardFunc(keyboard);
+	glutDisplayFunc(display);
+	glutMouseFunc(tbMouseFunc);    // traqueboule uses the mouse
+	glutMotionFunc(tbMotionFunc);  // traqueboule uses the mouse
+	glutIdleFunc(idle);
+
+
+	// Details on how to stage fright?
+	glEnable(GL_DEPTH_TEST);            // perform depth testing
+	glShadeModel(GL_SMOOTH);
+
+	// Clear all
+	glClearColor(BackgroundColor[0], BackgroundColor[1], BackgroundColor[2], 0.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // the color and the z
+
+	initTexture();
+
+	// start of the main loop
+	glutMainLoop();
+
+	return 0;  // instruction jamais exécutée
+}
+
+
+
+// to change the size or desiconification
+void reshape(int w, int h)
+{
+	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	//glTranslatef(0, 0, 3);
+	gluPerspective(50, (float)w / h, 1, 10);
+	glMatrixMode(GL_MODELVIEW);
+}
 
 void keyboard(unsigned char key, int x, int y)
 {
@@ -604,7 +673,7 @@ void keyboard(unsigned char key, int x, int y)
 	case 'L':
 	{
 				LightPos.push_back(getCameraPosition());
-				LightColor.push_back(Vec3Df(1, 1, 1));
+				LightColor.push_back(defaultLightPos);
 				return;
 	}
 	case '+':
@@ -642,10 +711,6 @@ void keyboard(unsigned char key, int x, int y)
 				computeLighting();
 				return;
 	}
-	case 's':
-	{
-				ShowSelectedVertex = !ShowSelectedVertex;
-	}
 	case 'x':
 		Vx1 += 0.1;
 		Vx2 += 0.1;
@@ -658,13 +723,13 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 	case 'c':
 		//cout << showText << endl;
-		showText = (++temp) % 3;
+		showText = (++temp) % maxTex;
 		break;
 	case 'n':
 		//cout << showText << endl;
 		drawN = true;
 		break;
-	case 'a':
+	case 'q':
 		cout << "draw car" << endl;
 		drawC = true;
 		break;
@@ -684,205 +749,12 @@ void keyboard(unsigned char key, int x, int y)
 		shot = true;
 		car.shotBullet();
 		break;
-	case 'p':
-		printVector(mv, 16);
+	case 'a':
+		car.translate -= Vec3Df(0.1, 0, 0);
+		break;
+	case 'd':
+		car.translate += Vec3Df(0.1, 0, 0);
 		break;
 	}
 
-}
-
-void background(){
-	Mesh MyMesh;
-	std::vector<Vec3Df> lighting;
-
-	MyMesh.loadMesh(NbVertX, NbVertY, qurdSize);
-	lighting.resize(MyMesh.vertices.size());
-
-	Mesh MyMesh2;
-	std::vector<Vec3Df> lighting2;
-
-	MyMesh2.loadMesh(NbVertX, NbVertY, qurdSize);
-	lighting2.resize(MyMesh2.vertices.size());
-
-	Mesh MyMesh3;
-	std::vector<Vec3Df> lighting3;
-
-	MyMesh3.loadRoad(NbVertX, 3, qurdSize, 3);
-	lighting3.resize(MyMesh3.vertices.size());
-
-	Mesh MyMesh4;
-	std::vector<Vec3Df> lighting4;
-
-	MyMesh4.loadRoad(NbVertX, 3, qurdSize, 3);
-	lighting4.resize(MyMesh4.vertices.size());
-
-	meshes.push_back(MyMesh);
-	meshes.push_back(MyMesh2);
-	meshes.push_back(MyMesh3);
-	meshes.push_back(MyMesh4);
-
-	meshes[0].lighting = lighting;
-	meshes[1].lighting = lighting2;
-	meshes[2].lighting = lighting3;
-	meshes[3].lighting = lighting4;
-
-	//meshes[0].translate = Vec3Df(0, 0, 0);
-	//meshes[1].translate = Vec3Df(0, 0, 0);
-	//meshes[2].translate = Vec3Df(0, 0, 0);
-	//meshes[3].translate = Vec3Df(0, 0, 0);
-
-	//lightings.push_back(lighting);
-	//lightings.push_back(lighting2);
-	//lightings.push_back(lighting3);
-	//lightings.push_back(lighting4);
-
-	//translates.push_back(Vec3Df(0, 0, 0));
-	//translates.push_back(Vec3Df(0, 0, 0));
-	//translates.push_back(Vec3Df(0, 0, 0));
-	//translates.push_back(Vec3Df(0, 0, 0));
-
-	//computeLighting();
-}
-
-void idle()
-{
-	//CamPos=getCameraPosition();
-
-	if (updateAlways)
-		computeLighting();
-
-	collisionDetect2();
-
-	glutPostRedisplay();
-	animate();
-}
-
-//this function loads the textures in the GPU memory
-//the function is called once when the program starts
-void initTexture()
-{
-	//Mmm... you understood the mechanism of moving the checkerboard, but can you produce something else?
-	//1) load more textures using the file "brick.ppm" and put it in Texture[1], then "sand.ppm" and put it in Texture[2]
-	//	btw. the wise Imp named Gerold, or short "Gimp" (it is actually a software), knows how to write PPM files (P6 - colored images)
-	//  Hence, you can convert any image into a file that you can then use as a texture, but first stick to the given ones...
-	//3) To make use of these textures, you first need a magic wand from the village (function) display().
-	//	But be careful my young apprentice, you will need to traverse a desert...
-
-	Texture.resize(3);
-	Texture[0] = 0;
-	Texture[1] = 0;
-	Texture[2] = 0;
-
-	PPMImage image("checker.ppm");
-	glGenTextures(1, &Texture[0]);
-	glBindTexture(GL_TEXTURE_2D, Texture[0]);
-	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image.sizeX, image.sizeY,
-		GL_RGB, GL_UNSIGNED_BYTE, image.data);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	PPMImage image2("brick.ppm");
-	glGenTextures(1, &Texture[1]);
-	glBindTexture(GL_TEXTURE_2D, Texture[1]);
-	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image2.sizeX, image2.sizeY,
-		GL_RGB, GL_UNSIGNED_BYTE, image2.data);
-	glBindTexture(GL_TEXTURE_2D, 1);
-
-	PPMImage image3("sand.ppm");
-	glGenTextures(1, &Texture[2]);
-	glBindTexture(GL_TEXTURE_2D, Texture[2]);
-	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image3.sizeX, image3.sizeY,
-		GL_RGB, GL_UNSIGNED_BYTE, image3.data);
-	glBindTexture(GL_TEXTURE_2D, 2);
-}
-
-
-
-/************************************************************
-* Programme principal
-************************************************************/
-int main(int argc, char** argv)
-{
-	glutInit(&argc, argv);
-
-	background();
-	init();
-	computeLighting();
-
-	// layers of the framebuffer used by the application
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-
-	// position and size of the window
-	glutInitWindowPosition(200, 100);
-	glutInitWindowSize(W_fen, H_fen);
-	glutCreateWindow(argv[0]);
-
-	// Initializing the viewpoint
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	//////////////////////////////////////////////////////////////
-	// Initial position
-	glTranslatef(-1, -1, -5);
-	glRotatef(10, 1, 0, 0);
-	tbInitTransform();     // initialization viewpoint
-	tbHelp();                      // displays help on traqueboule
-
-	glDisable(GL_LIGHTING);
-	glEnable(GL_COLOR_MATERIAL);
-	glEnable(GL_NORMALIZE);
-
-	// wiring of callback
-	glutReshapeFunc(reshape);
-	glutKeyboardFunc(keyboard);
-	glutDisplayFunc(display);
-	glutMouseFunc(tbMouseFunc);    // traqueboule uses the mouse
-	glutMotionFunc(tbMotionFunc);  // traqueboule uses the mouse
-	glutIdleFunc(idle);
-
-
-	// Details on how to stage fright?
-	glEnable(GL_DEPTH_TEST);            // perform depth testing
-	glShadeModel(GL_SMOOTH);
-
-	// Clear all
-	glClearColor(BackgroundColor[0], BackgroundColor[1], BackgroundColor[2], 0.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // the color and the z
-
-	initTexture();
-
-	// start of the main loop
-	glutMainLoop();
-
-	return 0;  // instruction jamais exécutée
-}
-
-
-/************************************************************
-* Management functions opengl? Do not touch
-************************************************************/
-// Display actions 
-// Do not change
-void display(void)
-{
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // la couleur et le z
-
-	glLoadIdentity();  // repere camera
-
-	tbVisuTransform(); // origine et orientation de la scene
-
-	dessinerBackground();
-
-	dessinerOther();
-
-	glutSwapBuffers();
-}
-
-// to change the size or desiconification
-void reshape(int w, int h)
-{
-	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	//glTranslatef(0, 0, 3);
-	gluPerspective(50, (float)w / h, 1, 10);
-	glMatrixMode(GL_MODELVIEW);
 }

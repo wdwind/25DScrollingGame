@@ -4,8 +4,9 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
-#include <float.h>
 #include "Vec3D.h"
+#include <algorithm>
+#include <assert.h>
 
 
 Mesh::Mesh(){}
@@ -14,27 +15,30 @@ using namespace std;
 /************************************************************
  * Fonction de calcul du cube englobant le maillage
  ************************************************************/
-void Mesh::computeBoundingCube () {
-    //A completer
+void Mesh::computeBoundingCube() {
+	//A completer trouver bbOrigin = (xmin, ymin, zmin) du bounding cube et bbEdgeSize
+	//A supplement find bbOrigin = (xmin, ymin, zmin) of the bounding cube and bbEdgeSize
+	bbOrigin = vertices[0].p;
+	Vec3Df Max = vertices[0].p;
 
-    Vec3Df bbCenter = Vec3Df(0.,0.,0.);
-    for  (unsigned int i = 0; i < vertices.size (); i++)
-        bbCenter += vertices[i].p;
-    bbCenter /= vertices.size ();
-    float bbHalfEdge = Vec3Df::distance (vertices[0].p, bbCenter);
-    for (unsigned int i = 0; i < vertices.size (); i++){
-        float m = Vec3Df::distance (vertices[i].p, bbCenter);
-        if (m > bbHalfEdge)
-            bbHalfEdge = m;
-    }
+	for (int i = 1; i < vertices.size(); i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			if (bbOrigin[j] > vertices[i].p[j])
+			{
+				bbOrigin[j] = vertices[i].p[j];
+			}
+			if (Max[j] < vertices[i].p[j])
+			{
+				Max[j] = vertices[i].p[j];
+			}
+		}
+	}
 
-    //Elargissement
-    bbHalfEdge += 0.01;
+	//bbOrigin = bbOrigin - (float)0.01;
 
-    bbMinPos = Vec3Df(bbCenter[0] - bbHalfEdge, bbCenter[1] - bbHalfEdge, bbCenter[2] - bbHalfEdge);
-    bbEdgeSize = bbHalfEdge*2.;
-    cout <<"bb min pos : " << bbMinPos << endl;
-    cout <<"bb cube edge size : " << bbEdgeSize << endl;
+	bbEdgeSize = fmax(Max[0] - bbOrigin[0], fmax(Max[1] - bbOrigin[1], Max[2] - bbOrigin[2])) + 0.01;
 }
 
 
@@ -262,21 +266,43 @@ int Mesh::getClosestVertexIndex(const Vec3Df & origin, const Vec3Df & direction)
 }	
 
 void Mesh::draw(){
-    glBegin(GL_TRIANGLES);
+    //glBegin(GL_TRIANGLES);
 
-    for (int i=0;i<triangles.size();++i)
-    {
-        Vec3Df edge01 = vertices[triangles[i].v[1]].p -  vertices[triangles[i].v[0]].p;
-        Vec3Df edge02 = vertices[triangles[i].v[2]].p -  vertices[triangles[i].v[0]].p;
-        Vec3Df n = Vec3Df::crossProduct (edge01, edge02);
-        n.normalize ();
-        glNormal3f(n[0], n[1], n[2]);
-        for(int v = 0; v < 3 ; v++){
-            glVertex3f(vertices[triangles[i].v[v]].p[0], vertices[triangles[i].v[v]].p[1] , vertices[triangles[i].v[v]].p[2]);
-        }
+    //for (int i=0;i<triangles.size();++i)
+    //{
+    //    Vec3Df edge01 = vertices[triangles[i].v[1]].p -  vertices[triangles[i].v[0]].p;
+    //    Vec3Df edge02 = vertices[triangles[i].v[2]].p -  vertices[triangles[i].v[0]].p;
+    //    Vec3Df n = Vec3Df::crossProduct (edge01, edge02);
+    //    n.normalize ();
+    //    glNormal3f(n[0], n[1], n[2]);
+    //    for(int v = 0; v < 3 ; v++){
+    //        glVertex3f(vertices[triangles[i].v[v]].p[0], vertices[triangles[i].v[v]].p[1] , vertices[triangles[i].v[v]].p[2]);
+    //    }
 
-    }
-    glEnd();
+    //}
+    //glEnd();
+
+	//GLfloat vv[6] = { 0, 0, 100, 200, 200, 0 };
+
+	glBegin(GL_TRIANGLES);
+
+	for (int i = 0; i<triangles.size(); ++i)
+	{
+		for (int v = 0; v < 3; v++){
+			const Vec3Df & color = Vec3Df(1, 1, 1);
+			if (!texcords2f.empty())
+			{
+				glTexCoord2fv(&(texcords2f[2 * triangles[i].v[v]]));
+			}//else
+				//glTexCoord2fv(vv);
+
+			glColor3f(color[0], color[1], color[2]);
+			glNormal3f(vertices[triangles[i].v[v]].n[0], vertices[triangles[i].v[v]].n[1], vertices[triangles[i].v[v]].n[2]);
+			glVertex3f(vertices[triangles[i].v[v]].p[0], vertices[triangles[i].v[v]].p[1], vertices[triangles[i].v[v]].p[2]);
+		}
+
+	}
+	glEnd();
 }
 
 
@@ -555,6 +581,9 @@ bool Mesh::loadMesh(int NbVertX, int NbVertY, float qurdSize){
 }
 
 void Mesh::loadRoad(int NbVertX, int NbVertY, float qurdSizeX, float qurdSizeY){
+	cout << qurdSizeX << endl;
+	cout << qurdSizeY << endl;
+
 	//int NbVertX = 7, NbVertY = 2;
 	//float qurdSize = 1;
 	//vertices
@@ -599,9 +628,10 @@ void Mesh::loadRoad(int NbVertX, int NbVertY, float qurdSizeX, float qurdSizeY){
 			SurfaceVertices3f[ind1] = y;
 			ind1++;
 
-			texcords2f[ind2] = x;
+			texcords2f[ind2] = j;
 			ind2++;
-			texcords2f[ind2] = z;
+
+			texcords2f[ind2] = i;
 			ind2++;
 
 			if (i < NbVertY - 1 && j < NbVertX - 1)
@@ -709,5 +739,119 @@ void Mesh::drawSomeP()
 		glVertex3f(vertices[i].p[0] + 4, vertices[i].p[1] + 0.5, vertices[i].p[2] + 1);
 		glPopMatrix();
 		glEnd();
+	}
+}
+
+template <typename T>
+T clip(const T& n, const T& lower, const T& upper) {
+	return std::max(lower, std::min(n, upper));
+}
+
+Vec3Df Mesh::computeLighting(Vec3Df & vertexPos, Vec3Df & normal, Light l, Vec3Df & CamPos, Mode mode)
+{
+	//cout << CamPos << endl;
+
+	Vec3Df MaterialDiffuseColor = Vec3Df(1, 1, 1);
+	Vec3Df MaterialAmbientColor = 0.05 * MaterialDiffuseColor;
+
+	//do not change any global variables here! This function will be called for EACH vertex 
+	//of the mesh, so your change would happen several times
+	switch (mode)
+	{
+	case ORIGINAL_LIGHTING:
+	{
+							  return Vec3Df(1, 1, 1);
+	}
+	case DIFFUSE_LIGHTING:
+	{
+							 Vec3Df lightDir = (l.lightPos - vertexPos).unit();
+							 float distance = (l.lightPos - vertexPos).getSquaredLength();
+							 float intensity1 = Vec3Df::dotProduct(normal, lightDir);
+							 intensity1 = clip(Vec3Df::dotProduct(normal, lightDir), (float)0, (float)1);
+
+							 //lightDir = lightDir.unit();
+							 //clip(1, 2, 3);
+							 //Vec3Df test = LightColor[light];
+							 //test = Vec3Df::dotProduct(normal, currentLight)*LightColor[light];
+
+							 return l.lightPower*intensity1*l.lightColor / distance + MaterialAmbientColor;
+	}
+	case SPECULAR_LIGHTING:
+	{
+							  Vec3Df lightDir = (l.lightPos - vertexPos).unit();
+							  float distance = (l.lightPos - vertexPos).getSquaredLength();
+							  Vec3Df camDir = (CamPos - vertexPos).unit();
+							  Vec3Df H = (camDir + lightDir).unit();
+							  float NdotH = Vec3Df::dotProduct(normal, H);
+
+							  NdotH = clip(NdotH, (float)0, (float)1);
+
+							  float intensity2 = pow(NdotH, l.s);
+
+							  return l.lightPower*intensity2*l.lightColor / distance + MaterialAmbientColor;
+	}
+	case COMBINED_LIGHTING:
+	{
+							  Vec3Df lightDir = (l.lightPos - vertexPos).unit();
+							  float intensity1 = clip(Vec3Df::dotProduct(normal, lightDir), (float)0, (float)1);
+
+							  // need to divide distance???
+							  float distance = (l.lightPos - vertexPos).getSquaredLength();
+							  //distance = 1;
+
+							  Vec3Df camDir = (CamPos - vertexPos).unit();
+							  Vec3Df H = (camDir + lightDir).unit();
+							  float NdotH = Vec3Df::dotProduct(normal, H);
+							  NdotH = clip(NdotH, (float)0, (float)1);
+							  float intensity2 = pow(NdotH, l.s);
+
+							  //cout << distance << endl;
+
+							  return l.lightPower*(intensity2*l.lightColor + intensity1*l.lightColor) / (distance)+MaterialAmbientColor;
+	}
+	case TOON_LIGHTING:
+	{
+						  Vec3Df lightDir = (l.lightPos - vertexPos).unit();
+						  float intensity1 = Vec3Df::dotProduct(normal, lightDir);
+						  intensity1 = clip(Vec3Df::dotProduct(normal, lightDir), (float)0, (float)1);
+
+						  float distance = (l.lightPos - vertexPos).getSquaredLength();
+
+						  //cout << Vec3Df::dotProduct(normal, lightDir) << endl;
+						  float threshold = 0.5;
+						  float temp = 0;
+						  if (Vec3Df::dotProduct(normal, lightDir) > threshold)
+						  {
+							  temp = 0.7;
+						  }
+						  else
+						  {
+							  temp = 0;
+						  }
+
+
+						  //int s = 8;
+						  Vec3Df camDir = (CamPos - vertexPos).unit();
+						  Vec3Df H = (camDir + lightDir).unit();
+						  float NdotH = Vec3Df::dotProduct(normal, H);
+						  NdotH = clip(NdotH, (float)0, (float)1);
+						  float intensity2 = pow(NdotH, l.s);
+
+						  float temp2 = 0;
+						  float threshold2 = 0.7;
+						  if (intensity2 > threshold2)
+						  {
+							  temp2 = 0.7;
+						  }
+						  else
+						  {
+							  temp2 = 0;
+						  }
+
+						  return (temp * l.lightColor + temp2 * l.lightColor) * l.lightPower / distance + MaterialAmbientColor;
+	}
+
+	default:
+		return Vec3Df(0, 1, 0);
 	}
 }

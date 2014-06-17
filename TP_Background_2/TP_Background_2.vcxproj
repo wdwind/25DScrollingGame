@@ -82,10 +82,13 @@
     <ClInclude Include="car.h" />
     <ClInclude Include="enemy.h" />
     <ClInclude Include="fileloader.h" />
+    <ClInclude Include="grid.h" />
+    <ClInclude Include="light.h" />
     <ClInclude Include="loadppm.h" />
     <ClInclude Include="matrix.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="move.h" />
+    <ClInclude Include="texture.h" />
     <ClInclude Include="traqueboule.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="utils.h" />
@@ -93,6 +96,7 @@
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="grid.cpp" />
     <ClCompile Include="loadppm.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mesh.cpp" />
@@ -101,6 +105,20 @@
     <None Include="brick.ppm" />
     <None Include="checker.ppm" />
     <None Include="sand.ppm" />
+    <None Include="textureBullet01X.ppm" />
+    <None Include="textureBullet02X.ppm" />
+    <None Include="textureJeep01X.ppm" />
+    <None Include="textureJeep02X.ppm" />
+    <None Include="textureJeep03X.ppm" />
+    <None Include="textureRoad01.ppm" />
+    <None Include="textureRoad02.ppm" />
+    <None Include="textureSky01X.ppm" />
+    <None Include="textureSky02X.ppm" />
+    <None Include="textureSun01X.ppm" />
+    <None Include="textureSun02X.ppm" />
+    <None Include="textureTerrainX.ppm" />
+    <None Include="textureWheel01X.ppm" />
+    <None Include="textureWheel02X.ppm" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="DavidHeadCleanMax.obj">
@@ -109,6 +127,16 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="enemy.obj">
+      <FileType>Document</FileType>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="boss.obj">
+      <FileType>Document</FileType>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="monster.obj">
       <FileType>Document</FileType>
     </Image>
   </ItemGroup>
