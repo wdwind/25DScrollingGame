@@ -135,14 +135,16 @@
     <Image Include="DavidHeadCleanMax.obj">
       <Filter>资源文件</Filter>
     </Image>
-    <Image Include="enemy.obj">
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="boss.obj">
       <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="boss.obj">
+    </Object>
+    <Object Include="enemy.obj">
       <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="monster.obj">
+    </Object>
+    <Object Include="monster.obj">
       <Filter>资源文件</Filter>
-    </Image>
+    </Object>
   </ItemGroup>
 </Project>

@@ -126,19 +126,9 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="enemy.obj">
-      <FileType>Document</FileType>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="boss.obj">
-      <FileType>Document</FileType>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="monster.obj">
-      <FileType>Document</FileType>
-    </Image>
+    <Object Include="boss.obj" />
+    <Object Include="enemy.obj" />
+    <Object Include="monster.obj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
