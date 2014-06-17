@@ -209,58 +209,58 @@ bool testIntersect(const Vec3Df & src, const Vec3Df & dir,
 
 int Mesh::getClosestVertexIndex(const Vec3Df & origin, const Vec3Df & direction)
 {
-	float minT=FLT_MAX;
-	float minBeta=FLT_MAX;
-	float minGamma=FLT_MAX;
-	unsigned int minFh=0;
+	//float minT=FLT_MAX;
+	//float minBeta=FLT_MAX;
+	//float minGamma=FLT_MAX;
+	//unsigned int minFh=0;
 
-	float tT=FLT_MAX;
-	float betaT=FLT_MAX;
-	float gammaT=FLT_MAX;
-	bool hit=false;
+	//float tT=FLT_MAX;
+	//float betaT=FLT_MAX;
+	//float gammaT=FLT_MAX;
+	//bool hit=false;
 
-	for (unsigned int i=0; i<triangles.size();++i)
-	{
-		if (testIntersect(origin, direction, vertices[triangles[i].v[0]].p, vertices[triangles[i].v[1]].p, vertices[triangles[i].v[2]].p, &betaT, &gammaT, &tT))
-		{
-			hit=true;
-			if (tT<minT)
-			{
-				minT=tT;
-				minBeta=betaT;
-				minGamma=gammaT;
-				minFh=i;
-			}
-		}
-	}
+	//for (unsigned int i=0; i<triangles.size();++i)
+	//{
+	//	if (testIntersect(origin, direction, vertices[triangles[i].v[0]].p, vertices[triangles[i].v[1]].p, vertices[triangles[i].v[2]].p, &betaT, &gammaT, &tT))
+	//	{
+	//		hit=true;
+	//		if (tT<minT)
+	//		{
+	//			minT=tT;
+	//			minBeta=betaT;
+	//			minGamma=gammaT;
+	//			minFh=i;
+	//		}
+	//	}
+	//}
 
-	float beta, gamma, t;
-	int fh=minFh;
-	
-	beta=minBeta;
-	gamma=minGamma;
-	t=minT;
-	fh=minFh;
-	
-	if (hit)
-	{
-		if (beta<0.5)
-		{
-			//p0 or p2
-			if(gamma<0.5)
-				return triangles[minFh].v[0];
-			else
-				return triangles[minFh].v[2];
-		}
-		else
-		{
-			if(gamma<0.5)
-				return triangles[minFh].v[1];
-			else
-				return triangles[minFh].v[2];
-		}
-	}
-	else
+	//float beta, gamma, t;
+	//int fh=minFh;
+	//
+	//beta=minBeta;
+	//gamma=minGamma;
+	//t=minT;
+	//fh=minFh;
+	//
+	//if (hit)
+	//{
+	//	if (beta<0.5)
+	//	{
+	//		//p0 or p2
+	//		if(gamma<0.5)
+	//			return triangles[minFh].v[0];
+	//		else
+	//			return triangles[minFh].v[2];
+	//	}
+	//	else
+	//	{
+	//		if(gamma<0.5)
+	//			return triangles[minFh].v[1];
+	//		else
+	//			return triangles[minFh].v[2];
+	//	}
+	//}
+	//else
 		return -1;
 	
 }	
@@ -305,6 +305,128 @@ void Mesh::draw(){
 	glEnd();
 }
 
+bool Mesh::loadBoss(const char * filename){
+//
+//	std::vector<int> vhandles;
+//
+//	const unsigned int LINE_LEN = 256;
+//	char s[LINE_LEN];
+//	FILE * in;
+//#ifdef WIN32
+//	errno_t error = fopen_s(&in, filename, "r");
+//	if (error != 0)
+//#else
+//	in = fopen(filename, "r");
+//	if (!(in))
+//#endif
+//		return false;
+//
+//	while (in && !feof(in) && fgets(s, LINE_LEN, in))
+//	{
+//		// material file
+//		// vertex
+//		if (strncmp(s, "v ", 2) == 0)
+//		{
+//			if (sscanf_s(s, "v %f %f %f", &x, &y, &z))
+//				vertices.push_back(Vertex(Vec3Df(x, y, z)));
+//		}
+//		// face
+//		else if (strncmp(s, "f ", 2) == 0)
+//		{
+//			int component(0), nV(0);
+//			bool endOfVertex(false);
+//			char *p0, *p1(s + 2); //place behind the "f "
+//
+//			vhandles.clear();
+//
+//			while (*p1 == ' ') ++p1; // skip white-spaces
+//
+//			while (p1)
+//			{
+//				p0 = p1;
+//
+//				// overwrite next separator
+//
+//				// skip '/', '\n', ' ', '\0', '\r' <-- don't forget Windows
+//				while (*p1 != '/' && *p1 != '\r' && *p1 != '\n' &&
+//					*p1 != ' ' && *p1 != '\0')
+//					++p1;
+//
+//				// detect end of vertex
+//				if (*p1 != '/') endOfVertex = true;
+//
+//				// replace separator by '\0'
+//				if (*p1 != '\0')
+//				{
+//					*p1 = '\0';
+//					p1++; // point to next token
+//				}
+//
+//				// detect end of line and break
+//				if (*p1 == '\0' || *p1 == '\n')
+//					p1 = 0;
+//
+//
+//				// read next vertex component
+//				if (*p0 != '\0')
+//				{
+//					switch (component)
+//					{
+//					case 0: // vertex
+//						vhandles.push_back(atoi(p0) - 1);
+//						break;
+//
+//					case 1: // texture coord
+//						//assert(!vhandles.empty());
+//						//assert((unsigned int)(atoi(p0)-1) < texcoords.size());
+//						//_bi.set_texcoord(vhandles.back(), texcoords[atoi(p0)-1]);
+//						break;
+//
+//					case 2: // normal
+//						//assert(!vhandles.empty());
+//						//assert((unsigned int)(atoi(p0)-1) < normals.size());
+//						//_bi.set_normal(vhandles.back(), normals[atoi(p0)-1]);
+//						break;
+//					}
+//				}
+//
+//				++component;
+//
+//				if (endOfVertex)
+//				{
+//					component = 0;
+//					nV++;
+//					endOfVertex = false;
+//				}
+//			}
+//
+//
+//			if (vhandles.size()>3)
+//			{
+//				//model is not triangulated, so let us do this on the fly...
+//				//to have a more uniform mesh, we add randomization
+//				unsigned int k = (false) ? (rand() % vhandles.size()) : 0;
+//				for (unsigned int i = 0; i<vhandles.size() - 2; ++i)
+//				{
+//					triangles.push_back(Triangle(vhandles[(k + 0) % vhandles.size()], vhandles[(k + i + 1) % vhandles.size()], vhandles[(k + i + 2) % vhandles.size()]));
+//				}
+//			}
+//			else if (vhandles.size() == 3)
+//			{
+//				triangles.push_back(Triangle(vhandles[0], vhandles[1], vhandles[2]));
+//			}
+//			else
+//			{
+//				printf("TriMesh::LOAD: Unexpected number of face vertices (<3). Ignoring face");
+//			}
+//		}
+//		memset(&s, 0, LINE_LEN);
+//	}
+//	fclose(in);
+//
+
+	return 1;
+}
 
 /************************************************************
  * Fonctions de chargement du maillage
@@ -334,7 +456,11 @@ bool Mesh::loadMesh(const char * filename)
         // vertex
         if (strncmp(s, "v ", 2) == 0)
         {
+#ifdef WIN32
             if (sscanf_s(s, "v %f %f %f", &x, &y, &z))
+#else
+			if (sscanf(s, "v %f %f %f", &x, &y, &z))
+#endif
                 vertices.push_back(Vertex(Vec3Df(x,y,z)));
         }
         // face
@@ -747,7 +873,7 @@ T clip(const T& n, const T& lower, const T& upper) {
 	return std::max(lower, std::min(n, upper));
 }
 
-Vec3Df Mesh::computeLighting(Vec3Df & vertexPos, Vec3Df & normal, Light l, Vec3Df & CamPos, Mode mode)
+Vec3Df Mesh::computeLighting(Vec3Df vertexPos, Vec3Df normal, Light l, Vec3Df CamPos, Mode mode)
 {
 	//cout << CamPos << endl;
 

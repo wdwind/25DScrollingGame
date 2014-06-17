@@ -25,9 +25,11 @@
 //    Polyline and Polygon with n vertices {int n;  Point *V;}
 //        (a Polygon has V[n]=V[0])
 //===================================================================
+#ifndef MOVE
+#define MOVE
 
 #include "Vertex.h"
-#include "Vec3d.h"
+#include "Vec3D.h"
 #include <vector>
 
 
@@ -124,3 +126,5 @@ intersect3D_RayTriangle(Vec3Df R1, Vec3Df R2, RealTriangle T)//, Vec3Df* I)
 
 	return 1;                       // I is in T
 }
+
+#endif

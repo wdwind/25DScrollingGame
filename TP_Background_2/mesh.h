@@ -47,6 +47,7 @@ public:
 	std::vector<float> texcords2f;
 
     bool loadMesh(const char * filename);
+	bool loadBoss(const char * filename);
 	bool loadMesh(int NbVertX = 7, int NbVertY = 3, float qurdSize = 1);
 	void loadRoad(int NbVertX = 7, int NbVertY = 3, float qurdSizeX = 1, float qurdSizeY = 1);
     void computeVertexNormals ();
@@ -60,7 +61,7 @@ public:
 	void drawSomeP();
     void computeBoundingCube();
 	int getClosestVertexIndex(const Vec3Df & origin, const Vec3Df & direction);
-	static Vec3Df computeLighting(Vec3Df & vertexPos, Vec3Df & normal, Light light, Vec3Df & CamPos, Mode mode);
+	static Vec3Df computeLighting(Vec3Df vertexPos, Vec3Df normal, Light light, Vec3Df CamPos, Mode mode);
 
 	//void setLighting(std::vector<Vec3Df> & l) { lighting = l;};
 	//void setTranslate(Vec3Df t) { translate = t; };

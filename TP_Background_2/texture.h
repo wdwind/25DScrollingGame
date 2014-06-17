@@ -3,7 +3,7 @@
 
 #include "loadppm.h"
 #include <vector>
-#include <GL\glut.h>
+#include <GL/glut.h>
 
 std::vector<GLuint> Texture;
 int showText = 14;

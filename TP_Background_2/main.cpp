@@ -9,7 +9,7 @@
 #include "mesh.h"
 #include "loadppm.h"
 #include "car.h"
-#include "move.h"
+//#include "move.h"
 #include "utils.h"
 #include "enemy.h"
 #include "bullet.h"
