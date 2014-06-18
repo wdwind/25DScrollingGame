@@ -7,6 +7,8 @@
 
 std::vector<GLuint> Texture;
 int showText = 14;
+int temp = showText;
+int maxTex = 19;
 
 //this function loads the textures in the GPU memory
 //the function is called once when the program starts
@@ -19,7 +21,7 @@ void initTexture()
 	//3) To make use of these textures, you first need a magic wand from the village (function) display().
 	//	But be careful my young apprentice, you will need to traverse a desert...
 
-	Texture.resize(17);
+	Texture.resize(19);
 	Texture[0] = 0;
 	Texture[1] = 0;
 	Texture[2] = 0;
@@ -143,6 +145,20 @@ void initTexture()
 	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image17.sizeX, image17.sizeY,
 		GL_RGB, GL_UNSIGNED_BYTE, image17.data);
 	glBindTexture(GL_TEXTURE_2D, 16);
+
+	PPMImage image18("boss.ppm");
+	glGenTextures(1, &Texture[17]);
+	glBindTexture(GL_TEXTURE_2D, Texture[17]);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image18.sizeX, image18.sizeY,
+		GL_RGB, GL_UNSIGNED_BYTE, image18.data);
+	glBindTexture(GL_TEXTURE_2D, 17);
+
+	PPMImage image19("boss02.ppm");
+	glGenTextures(1, &Texture[18]);
+	glBindTexture(GL_TEXTURE_2D, Texture[18]);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image19.sizeX, image19.sizeY,
+		GL_RGB, GL_UNSIGNED_BYTE, image19.data);
+	glBindTexture(GL_TEXTURE_2D, 18);
 }
 
 #endif

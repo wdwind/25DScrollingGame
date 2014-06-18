@@ -24,6 +24,8 @@ void keyboard(unsigned char key, int x, int y);
 void display(void);
 void reshape(int w, int h);
 
+int test = 0;
+
 void computeLighting()
 {
 	for (int j = 0; j < meshes.size(); j++)
@@ -47,6 +49,18 @@ void computeLighting()
 			(*result)[i] = Vec3Df();
 			for (int l = 0; l < LightPos.size(); ++l)
 				(*result)[i] += Mesh::computeLighting(enemies[j].vertices[i].p + enemies[j].translate, enemies[j].vertices[i].n, light, CamPos, mode);
+		}
+	}
+
+	if (boss == 1)
+	{
+		std::vector<Vec3Df> *result = &(Boss.lighting);
+
+		for (unsigned int i = 0; i<Boss.vertices.size(); ++i)
+		{
+			(*result)[i] = Vec3Df();
+			for (int l = 0; l < LightPos.size(); ++l)
+				(*result)[i] += Mesh::computeLighting(Boss.vertices[i].p + Boss.translate, Boss.vertices[i].n, light, CamPos, mode);
 		}
 	}
 }
@@ -96,49 +110,96 @@ void collisionDetect2(){
 	//		}
 	//	}
 	//}
-	
-	for (vector<Enemy>::iterator it2 = enemies.begin(); it2 != enemies.end();)
+	if (!enemies.empty())
 	{
-		if (it2->disappear)
+		for (vector<Enemy>::iterator it2 = enemies.begin(); it2 != enemies.end();)
 		{
-			it2 = enemies.erase(it2);
-			destroyedE++;
+			if (it2->disappear)
+			{
+				it2 = enemies.erase(it2);
+				destroyedE++;
+			}
+			else
+				++it2;
 		}
-		else
-			++it2;
 	}
+	
+
+	if (Boss.disappear)
+	{
+		boss = 100;
+		Boss = Enemy();
+	}
+
+	if (!enemies.empty())
+	{
+		for (vector<Bullet>::iterator it1 = car.bullets.begin(); it1 != car.bullets.end();)
+		{
+			bool match = false;
+			for (vector<Enemy>::iterator it2 = enemies.begin(); it2 != enemies.end();)
+			{
+				Vec3Df bPos = it1->getCurrentPos();
+				Vec3Df ePos = it2->getCurrentPos();
+
+				if (!it2->Explode && (bPos - ePos).getLength() < it2->maxDist && it1->shot)
+				{
+					match = true;
+					// it1 = car.bullets.erase(it1);
+					//enemies.erase(enemies.begin() + j);
+
+					if (!it2->Shot())
+					{
+						it2->explode();
+						//it2 = enemies.erase(it2);
+						//destroyedE++;
+					}
+					/*if (it2->disappear)
+					{
+						it2 = enemies.erase(it2);
+						destroyedE++;
+					}*/
+					break;
+				}
+				else
+				{
+					++it2;
+				}
+			}
+			if (match)
+			{
+				it1 = car.bullets.erase(it1);
+			}
+			else
+			{
+				++it1;
+			}
+		}
+	}
+
 
 	for (vector<Bullet>::iterator it1 = car.bullets.begin(); it1 != car.bullets.end();)
 	{
 		bool match = false;
-		for (vector<Enemy>::iterator it2 = enemies.begin(); it2 != enemies.end();)
-		{
-			Vec3Df bPos = it1->getCurrentPos();
-			Vec3Df ePos = it2->getCurrentPos();
 
-			if (!it2->Explode && (bPos - ePos).getLength() < it2->maxDist)
+		Enemy* it2 = &Boss;
+
+		Vec3Df bPos = it1->getCurrentPos();
+		Vec3Df ePos = it2->getCurrentPos();
+
+		if (!it2->Explode && (bPos - ePos).getLength() < it2->maxDist && it1->shot)
+		{
+			cout << it2->triangles.size() << endl;
+
+			match = true;
+			if (!it2->Shot())
 			{
-				match = true;
-				// it1 = car.bullets.erase(it1);
-				//enemies.erase(enemies.begin() + j);
-				if (!it2->Shot())
-				{
-					it2->explode();
-					//it2 = enemies.erase(it2);
-					//destroyedE++;
-				}
-				/*if (it2->disappear)
-				{
-					it2 = enemies.erase(it2);
-					destroyedE++;
-				}*/
-				break;
+				it2->explode();
 			}
-			else
-			{
-				++it2;
-			}
+
+			cout << "hit boss" << endl;
+			test++;
 		}
+
 		if (match)
 		{
 			it1 = car.bullets.erase(it1);
@@ -148,6 +209,7 @@ void collisionDetect2(){
 			++it1;
 		}
 	}
+
 }
 
 /**
@@ -277,7 +339,7 @@ void display(void)
 
 	dessinerOther();
 
-	if (boss)
+	if (boss == 1)
 	{
 		drawBoss();
 	}
@@ -304,10 +366,9 @@ void dessinerBackground()
 	glDisable(GL_TEXTURE_2D);
 
 	glPopMatrix();
-
 	
 
-	if (boss)
+	if (boss == 1)
 	{
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, Texture[1]);
@@ -473,21 +534,25 @@ void dessinerBackground()
 
 void dessinerOther(){
 
-	for (int i = 0; i < enemies.size(); i++)
+	if (!enemies.empty())
 	{
-		//enemies[i].move();
-		enemies[i].drawCurrentPos();
-		glPushMatrix();
+		for (int i = 0; i < enemies.size(); i++)
+		{
+			//enemies[i].move();
+			enemies[i].drawCurrentPos();
+			glPushMatrix();
 			glTranslatef(enemies[i].translate[0], enemies[i].translate[1], enemies[i].translate[2]);
 			enemies[i].drawWithColors();
-		glPopMatrix();
+			glPopMatrix();
+		}
+
+		if (drawN)
+		{
+			enemies[0].drawNormals();
+			enemies[0].drawSomeP();
+		}
 	}
 	
-	if (drawN)
-	{
-		enemies[0].drawNormals();
-		enemies[0].drawSomeP();
-	}
 
 	//b.drawCurrentPos();
 
@@ -506,10 +571,12 @@ void dessinerOther(){
 }
 
 void drawBoss(){
-	if (Boss.vertices.empty())
+	if (Boss.vertices.empty() && boss == 1)
 	{
+		Boss = Enemy();
 		std::vector<Vec3Df> lighting;
-		Boss.loadMesh("monster.obj");
+		Boss.resolution = 16;
+		Boss.loadBoss("monster_2_2.obj");
 		lighting.resize(Boss.vertices.size());
 		Boss.lighting = lighting;
 		Boss.translate = bossStartPos;
@@ -522,8 +589,8 @@ void drawBoss(){
 		glRotatef(90, 0, -1, 0);
 
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, Texture[showText]);
-		Boss.draw();
+		glBindTexture(GL_TEXTURE_2D, Texture[17]);
+		Boss.drawBoss();
 		glBindTexture(GL_TEXTURE_2D, 2);
 		glDisable(GL_TEXTURE_2D);
 
@@ -541,10 +608,15 @@ void idle()
 
 	collisionDetect2();
 
+
 	enemiesType();
 
+
 	glutPostRedisplay();
+
+
 	animate();
+
 }
 
 void enemiesType(){
@@ -555,11 +627,12 @@ void enemiesType(){
 		enemy.translate = enemyStartPos;
 		enemies.push_back(enemy);
 	}
-	if (destroyedE > 3)
+	if (destroyedE > 3 && boss == 0)
 	{
+		cout << "LOAD BOSS" << endl;
 		destroyedE = 100;
 		enemies.clear();
-		boss = true;
+		boss = 1;
 	}
 }
 
@@ -589,7 +662,7 @@ int main(int argc, char** argv)
 	//////////////////////////////////////////////////////////////
 	// Initial position
 	glTranslatef(-1, -1.2, -5);
-	glRotatef(4, 1, 0, 0);
+	glRotatef(5, 1, 0, 0);
 	tbInitTransform();     // initialization viewpoint
 	tbHelp();                      // displays help on traqueboule
 

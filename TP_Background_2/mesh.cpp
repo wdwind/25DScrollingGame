@@ -304,132 +304,186 @@ void Mesh::draw(){
 	}
 	glEnd();
 }
+void Mesh::drawBoss(){
+	//glBegin(GL_TRIANGLES);
+
+	//for (int i=0;i<triangles.size();++i)
+	//{
+	//    //Vec3Df edge01 = vertices[triangles[i].v[1]].p -  vertices[triangles[i].v[0]].p;
+	//    //Vec3Df edge02 = vertices[triangles[i].v[2]].p -  vertices[triangles[i].v[0]].p;
+	//    //Vec3Df n = Vec3Df::crossProduct (edge01, edge02);
+	//    //n.normalize ();
+	//    //glNormal3f(n[0], n[1], n[2]);
+	//	glBegin(GL_TRIANGLES);
+	//    for(int v = 0; v < 3 ; v++){
+	//		Vec3Df temp = Vec3Df(vertices[triangles[i].v[v]].p[0], vertices[triangles[i].v[v]].p[1], vertices[triangles[i].v[v]].p[2]);
+	//        glVertex3f(vertices[triangles[i].v[v]].p[0], vertices[triangles[i].v[v]].p[1] , vertices[triangles[i].v[v]].p[2]);
+	//    }
+	//	glEnd();
+	//}
+	//glEnd();
+
+	//GLfloat vv[6] = { 0, 0, 100, 200, 200, 0 };
+
+	std::vector<Vec3Df> & colors = lighting;
+
+	glBegin(GL_TRIANGLES);
+
+	int texInd = 0;
+
+	for (int i = 0; i<triangles.size(); ++i)
+	{
+		for (int v = 0; v < 3; v++){
+			//const Vec3Df & color = colors[triangles[i].v[v]];
+			const Vec3Df & color = Vec3Df(1, 1, 1);
+			if (!texcords2f.empty())
+			{
+				if (texInd >= texcords2f.size())
+				{
+					texInd = 0;
+				}
+				glTexCoord2f(texcords2f[texInd], texcords2f[texInd + 1]);
+				texInd += 2;
+			}//else
+			//glTexCoord2fv(vv);
+
+			glColor3f(color[0], color[1], color[2]);
+			glNormal3f(vertices[triangles[i].v[v]].n[0], vertices[triangles[i].v[v]].n[1], vertices[triangles[i].v[v]].n[2]);
+			glVertex3f(vertices[triangles[i].v[v]].p[0], vertices[triangles[i].v[v]].p[1], vertices[triangles[i].v[v]].p[2]);
+		}
+
+	}
+	glEnd();
+}
+
 
 bool Mesh::loadBoss(const char * filename){
+	FILE* file;
+
+#ifdef WIN32
+	fopen_s(&file, filename, "r");
+#else
+	file = fopen(filename, "r");
+#endif
+	if (file == NULL){
+		printf("Impossible to open the file !n");
+		return false;
+	}
+
+	std::vector<Vec3Df> temp_vertices;
+	std::vector<Vec3Df> temp_uvs;
+	std::vector<Vec3Df> temp_normals;
+	std::vector<Vec3Df> vertexIndices, uvIndices, normalIndices;
 
 	std::vector<int> vhandles;
 
-	const unsigned int LINE_LEN = 256;
-	char s[LINE_LEN];
-	FILE * in;
+	while (1){
+
+		char lineHeader[128];
+		// read the first word of the line
 #ifdef WIN32
-	errno_t error = fopen_s(&in, filename, "r");
-	if (error != 0)
+		int res = fscanf_s(file, "%s", lineHeader, sizeof(lineHeader));
 #else
-	in = fopen(filename, "r");
-	if (!(in))
+		int res = fscanf(file, "%s", lineHeader);
 #endif
-		return false;
+		if (res == EOF)
+			break; // EOF = End Of File. Quit the loop.
 
-    float x, y, z;
-
-	while (in && !feof(in) && fgets(s, LINE_LEN, in))
-	{
-		// material file
-		// vertex
-		if (strncmp(s, "v ", 2) == 0)
-		{
-#ifdef WIN32
-			if (sscanf_s(s, "v %f %f %f", &x, &y, &z))
-#else
-			if (sscanf(s, "v %f %f %f", &x, &y, &z))
-#endif
-				vertices.push_back(Vertex(Vec3Df(x, y, z)));
+		float x, y, z;
+		// else : parse lineHeader
+		if (strcmp(lineHeader, "v") == 0){
+			//glm::vec3 vertex;
+			fscanf_s(file, "%f %f %fn", &x, &y, &z);
+			temp_vertices.push_back(Vec3Df(x, y, z));
 		}
-		// face
-		else if (strncmp(s, "f ", 2) == 0)
-		{
-			int component(0), nV(0);
-			bool endOfVertex(false);
-			char *p0, *p1(s + 2); //place behind the "f "
-
-			vhandles.clear();
-
-			while (*p1 == ' ') ++p1; // skip white-spaces
-
-			while (p1)
-			{
-				p0 = p1;
-
-				// overwrite next separator
-
-				// skip '/', '\n', ' ', '\0', '\r' <-- don't forget Windows
-				while (*p1 != '/' && *p1 != '\r' && *p1 != '\n' &&
-					*p1 != ' ' && *p1 != '\0')
-					++p1;
-
-				// detect end of vertex
-				if (*p1 != '/') endOfVertex = true;
-
-				// replace separator by '\0'
-				if (*p1 != '\0')
-				{
-					*p1 = '\0';
-					p1++; // point to next token
-				}
-
-				// detect end of line and break
-				if (*p1 == '\0' || *p1 == '\n')
-					p1 = 0;
-
-
-				// read next vertex component
-				if (*p0 != '\0')
-				{
-					switch (component)
-					{
-					case 0: // vertex
-						vhandles.push_back(atoi(p0) - 1);
-						break;
-
-					case 1: // texture coord
-						//assert(!vhandles.empty());
-						//assert((unsigned int)(atoi(p0)-1) < texcoords.size());
-						//_bi.set_texcoord(vhandles.back(), texcoords[atoi(p0)-1]);
-						break;
-
-					case 2: // normal
-						//assert(!vhandles.empty());
-						//assert((unsigned int)(atoi(p0)-1) < normals.size());
-						//_bi.set_normal(vhandles.back(), normals[atoi(p0)-1]);
-						break;
-					}
-				}
-
-				++component;
-
-				if (endOfVertex)
-				{
-					component = 0;
-					nV++;
-					endOfVertex = false;
-				}
-			}
-
-
-			if (vhandles.size()>3)
-			{
-				//model is not triangulated, so let us do this on the fly...
-				//to have a more uniform mesh, we add randomization
-				unsigned int k = (false) ? (rand() % vhandles.size()) : 0;
-				for (unsigned int i = 0; i<vhandles.size() - 2; ++i)
-				{
-					triangles.push_back(Triangle(vhandles[(k + 0) % vhandles.size()], vhandles[(k + i + 1) % vhandles.size()], vhandles[(k + i + 2) % vhandles.size()]));
-				}
-			}
-			else if (vhandles.size() == 3)
-			{
-				triangles.push_back(Triangle(vhandles[0], vhandles[1], vhandles[2]));
-			}
-			else
-			{
-				printf("TriMesh::LOAD: Unexpected number of face vertices (<3). Ignoring face");
-			}
+		else if (strcmp(lineHeader, "vt") == 0){
+			//glm::vec2 uv;
+			fscanf_s(file, "%f %fn", &x, &y);
+			temp_uvs.push_back(Vec3Df(x, y, 0));
 		}
-		memset(&s, 0, LINE_LEN);
+		else if (strcmp(lineHeader, "vn") == 0){
+			fscanf_s(file, "%f %f %fn", &x, &y, &z);
+			temp_normals.push_back(Vec3Df(x, y, z));
+		}
+		else if (strcmp(lineHeader, "f") == 0){
+			std::string vertex1, vertex2, vertex3;
+			unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
+			int matches = fscanf_s(file, "%d/%d/%d %d/%d/%d %d/%d/%dn", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
+			if (matches != 9){
+				printf("File can't be read by our simple parser : ( Try exporting with other optionsn");
+				return false;
+			}
+
+			vhandles.push_back(vertexIndex[0] - 1);
+			vhandles.push_back(vertexIndex[1] - 1);
+			vhandles.push_back(vertexIndex[2] - 1);
+			vertexIndices.push_back(Vec3Df(vertexIndex[0], vertexIndex[1], vertexIndex[2]));
+			uvIndices.push_back(Vec3Df(uvIndex[0], uvIndex[1], uvIndex[2]));
+			normalIndices.push_back(Vec3Df(normalIndex[0], normalIndex[1], normalIndex[2]));
+		}
 	}
-	fclose(in);
 
+	for (unsigned int i = 0; i < vertexIndices.size(); i++)
+	{
+		//for (int j = 0; j < 3; j++)
+		//{
+		//	unsigned int vertexIndex = vertexIndices[i][j];
+		//	vertices.push_back(temp_vertices[vertexIndex - 1]);
+		//}
+		triangles.push_back(Triangle(vertexIndices[i][0] - 1, vertexIndices[i][1] - 1, vertexIndices[i][2] - 1));
+	}
+
+	for (int i = 0; i < temp_vertices.size(); i++)
+	{
+		vertices.push_back(temp_vertices[i]);
+		vertices[i].n = temp_normals[i];
+	}
+
+	for (unsigned int i = 0; i < uvIndices.size(); i ++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			unsigned int uvIndex = uvIndices[i][j];
+			texcords2f.push_back(temp_uvs[uvIndex - 1][0]);
+			texcords2f.push_back(temp_uvs[uvIndex - 1][1]);
+		}
+	}
+
+	//for (unsigned int i = 0; i < normalIndices.size(); i += 3)
+	//{
+	//	for (int j = 0; j < 3; j++)
+	//	{
+	//		unsigned int normalIndex = normalIndices[i][j];
+	//		//vertices.push_back(temp_vertices[vertexIndex - 1]);
+	//		vertices[i].n = temp_normals[normalIndex - 1];
+	//	}
+	//}
+
+	//if (vhandles.size()>3)
+	//{
+	//	//model is not triangulated, so let us do this on the fly...
+	//	//to have a more uniform mesh, we add randomization
+	//	/*unsigned int k = (false) ? (rand() % vhandles.size()) : 0;
+	//	for (unsigned int i = 0; i<vhandles.size() - 2; ++i)
+	//	{
+	//		triangles.push_back(Triangle(vhandles[(k + 0) % vhandles.size()], vhandles[(k + i + 1) % vhandles.size()], vhandles[(k + i + 2) % vhandles.size()]));
+	//	}*/
+
+	//	for (unsigned int i = 0; i<vhandles.size() - 2; ++i)
+	//	{
+	//		triangles.push_back(Triangle(vhandles[i], vhandles[i+1], vhandles[i+2]));
+	//	}
+	//}
+	//else if (vhandles.size() == 3)
+	//{
+	//	triangles.push_back(Triangle(vhandles[0], vhandles[1], vhandles[2]));
+	//}
+	//else
+	//{
+	//	printf("TriMesh::LOAD: Unexpected number of face vertices (<3). Ignoring face");
+	//}
+
+	lighting.resize(vertices.size());
 
 	return 1;
 }

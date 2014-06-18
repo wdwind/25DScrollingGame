@@ -24,8 +24,8 @@ Car car = Car(defaultCarTrans);
 bool carMove = false;
 bool drawC = true;
 
-Mesh Boss;
-bool boss = false;
+Enemy Boss;
+int boss = 0;
 Vec3Df bossStartPos = Vec3Df(3, 1, 1);
 
 std::vector<Enemy> enemies;
@@ -79,9 +79,6 @@ int texRoad1 = 5;
 int texRoad2 = 6;
 int texSky = 0;
 int texSun = 0;
-
-int temp = showText;
-int maxTex = 17;
 
 
 // Roads and mountains!!!

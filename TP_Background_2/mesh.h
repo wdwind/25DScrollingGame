@@ -53,6 +53,7 @@ public:
     void computeVertexNormals ();
     void centerAndScaleToUnit ();
     void draw();
+	void drawBoss();
     void drawSmooth();
 	void drawWithColors(const std::vector<Vec3Df> & colors);
 	void drawWithColors();

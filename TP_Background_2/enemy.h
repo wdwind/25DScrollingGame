@@ -70,6 +70,53 @@ public:
 		simplified = Mesh(simplifiedVertices, simplifiedTriangles);
 		simplified.computeVertexNormals();
 
+		newIndexRemapping.clear();
+		simplifiedVertices.clear();
+		simplifiedTriangles.clear();
+
+		return 1;
+	}
+
+	bool loadBoss(const char * filename){
+		Mesh::loadBoss(filename);
+		Mesh::computeBoundingCube();
+		calculateCenter();
+		claculateMaxDist();
+
+		originVertices = vertices;
+		originTriangles = triangles;
+
+		grid1 = Grid(this->bbOrigin, this->bbEdgeSize, resolution);
+		grid1.putVertices(vertices);
+		grid1.computeRepresentants(vertices);
+
+		int count = 0;
+		for (RepresentantList::iterator it = grid1.representants.begin(); it != grid1.representants.end(); it++, count++){
+			newIndexRemapping[(*it).first] = count;
+			simplifiedVertices.push_back((*it).second);
+		}
+
+		for (int i = 0; i < triangles.size(); i++)
+		{
+			int index[3] = { 0, 0, 0 };
+			for (int j = 0; j < 3; j++)
+			{
+				index[j] = grid1.isContainedAt(vertices[triangles[i].v[j]].p);
+			}
+
+			if (!checkRepeat(index))
+			{
+				simplifiedTriangles.push_back(Triangle(newIndexRemapping[index[0]], newIndexRemapping[index[1]], newIndexRemapping[index[2]]));
+			}
+		}
+
+		simplified = Mesh(simplifiedVertices, simplifiedTriangles);
+		simplified.computeVertexNormals();
+
+		newIndexRemapping.clear();
+		simplifiedVertices.clear();
+		simplifiedTriangles.clear();
+
 		return 1;
 	}
 
@@ -123,7 +170,7 @@ public:
 	}
 
 	bool Shot(){
-		if (resolution < 5)
+		if (resolution < 2)
 		{
 			return false;
 		}
@@ -168,7 +215,10 @@ public:
 
 		simplified = Mesh(simplifiedVertices, simplifiedTriangles);
 		simplified.computeVertexNormals();
-		
+
+		newIndexRemapping.clear();
+		simplifiedVertices.clear();
+		simplifiedTriangles.clear();
 
 		return true;
 	}
@@ -203,6 +253,14 @@ public:
 			claculateMaxDist();
 			computeVertexNormals();
 
+			originTriangles.clear();
+			originVertices.clear();
+			newIndexRemapping.clear();
+			simplifiedVertices.clear();
+			simplifiedTriangles.clear();
+			grid1 = Grid();
+			simplified = Mesh();
+
 			Explode = true;
 		}
 
@@ -217,7 +275,7 @@ public:
 
 		for (int i = 0; i < vertices.size(); i++)
 		{
-			Vec3Df dir = (vertices[i].p - centerPoint).unit();
+			//Vec3Df dir = (vertices[i].p - centerPoint).unit();
 			vertices[i].p = vertices[i].p + speed * vertices[i].n;
 		}
 
@@ -236,6 +294,15 @@ public:
 		}
 
 		Mesh::drawWithColors();
+	}
+
+	void drawBoss(){
+		if (Explode)
+		{
+			explode();
+		}
+
+		Mesh::drawBoss();
 	}
 	
 };

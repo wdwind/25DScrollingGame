@@ -130,21 +130,25 @@
     <None Include="textureRoad02.ppm">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="boss.ppm">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="boss02.ppm">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="DavidHeadCleanMax.obj">
       <Filter>资源文件</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="boss.obj">
+    <Image Include="enemy.obj">
       <Filter>资源文件</Filter>
-    </Object>
-    <Object Include="enemy.obj">
+    </Image>
+    <Image Include="monster.obj">
       <Filter>资源文件</Filter>
-    </Object>
-    <Object Include="monster.obj">
+    </Image>
+    <Image Include="monster_2_2.obj">
       <Filter>资源文件</Filter>
-    </Object>
+    </Image>
   </ItemGroup>
 </Project>

@@ -24,6 +24,7 @@ public:
 
 	// Translation corresponding to the starting position
 	Vec3Df translate = Vec3Df(0, 0, 0);
+	Vec3Df translateWhenShot = Vec3Df(0, 0, 0);
 
 	// Rotation corresponding to the starting position
 	Vec3Df rotate = Vec3Df(0, 0, -1);
@@ -59,6 +60,9 @@ public:
 
 			if (shot)
 			{
+				Vec3Df offset = translateWhenShot - translate;
+				//cout << translateWhenShot << endl;
+				glTranslatef(offset[0], offset[1], offset[2]);
 				glTranslatef(speedX, 0, 0);
 				speedX += 0.01;
 
@@ -77,7 +81,12 @@ public:
 
 	Vec3Df getCurrentPos(){
 		Vec3Df cp = origin;
-		cp = cp + translate;
+		if (shot)
+		{
+			cp = cp + translateWhenShot;
+		}
+		else
+			cp = cp + translate;
 		//cp = Vec3Df(origin[0] * cos(theta*PI / 180) + origin[1] * sin(theta*PI / 180), -origin[0] * sin(theta*PI / 180) + origin[1] * cos(theta*PI / 180), origin[2]);
 		if (shot)
 		{

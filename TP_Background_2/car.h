@@ -162,19 +162,24 @@ public:
 		glPopMatrix();
 	}
 
-	void drawBullet(){
-		glColor3f(0, 0, 1);
+	//void drawBullet(){
+	//	glColor3f(0, 0, 1);
 
-		glPushMatrix();
-			glRotatef(rCanon, 0, 0, -1);
-			glTranslatef(PositionBullet[0], PositionBullet[1], PositionBullet[2]);
-			glutSolidSphere(.05, 50, 50);
-		glPopMatrix();
-	}
+	//	glPushMatrix();
+	//		glRotatef(rCanon, 0, 0, -1);
+	//		glTranslatef(PositionBullet[0], PositionBullet[1], PositionBullet[2]);
+	//		glutSolidSphere(.05, 50, 50);
+	//	glPopMatrix();
+	//}
 
 	void updateBullets(){
 		for (int i = 0; i < bullets.size(); i++)
 		{
+			//if (!bullets[i].shot)
+			//{
+			//	bullets[i].translate = translate;
+			//}
+
 			bullets[i].translate = translate;
 		}
 	}
@@ -188,11 +193,12 @@ public:
 			bullets.back().translate = translate;
 		}
 
-		updateBullets();
+		//updateBullets();
 
 		//bullets.end()->speed = 0.05;
 		bullets.back().origin = Vec3Df(PositionBullet[0] + 0.5, PositionBullet[1] + 0.5, PositionBullet[2] + 0.5);
 		bullets.back().translate = translate;
+		bullets.back().translateWhenShot = translate;
 		bullets.back().theta = rCanon;
 		bullets.back().shot = true;
 
@@ -213,6 +219,7 @@ public:
 		}
 
 		//bullets.back().drawBullet();
+		updateBullets();
 
 		for (int i = 0; i < bullets.size(); i++)
 		{
