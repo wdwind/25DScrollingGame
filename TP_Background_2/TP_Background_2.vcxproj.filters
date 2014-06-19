@@ -136,6 +136,36 @@
     <None Include="boss02.ppm">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="sun01.ppm">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="sun03.ppm">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="jeep01.ppm">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="jeep02.ppm">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="car03.ppm">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="car04.ppm">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="car06.ppm">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="car07.ppm">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="car08.ppm">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="car09.ppm">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="DavidHeadCleanMax.obj">
@@ -148,6 +178,9 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="monster_2_2.obj">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="monster_2_3.obj">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

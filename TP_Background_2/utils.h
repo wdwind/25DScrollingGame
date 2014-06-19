@@ -31,7 +31,7 @@ Vec3Df bossStartPos = Vec3Df(3, 1, 1);
 std::vector<Enemy> enemies;
 int destroyedE = 0;
 Vec3Df enemyStartPos = Vec3Df(3, 0.5, 1);
-Vec3Df enemyStartPos2 = Vec3Df(2, 2, 1);
+Vec3Df enemyStartPos2 = Vec3Df(1.5, 2.2, 1);
 
 // For all the spheres
 GLUquadricObj *sphere = NULL;
@@ -109,6 +109,7 @@ bool drawB = false;
 
 
 
-
+float time1 = 0;
+bool jump = false;
 
 #endif

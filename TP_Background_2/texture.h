@@ -8,7 +8,7 @@
 std::vector<GLuint> Texture;
 int showText = 14;
 int temp = showText;
-int maxTex = 19;
+int maxTex = 25;
 
 //this function loads the textures in the GPU memory
 //the function is called once when the program starts
@@ -21,7 +21,7 @@ void initTexture()
 	//3) To make use of these textures, you first need a magic wand from the village (function) display().
 	//	But be careful my young apprentice, you will need to traverse a desert...
 
-	Texture.resize(19);
+	Texture.resize(maxTex);
 	Texture[0] = 0;
 	Texture[1] = 0;
 	Texture[2] = 0;
@@ -111,14 +111,14 @@ void initTexture()
 		GL_RGB, GL_UNSIGNED_BYTE, image12.data);
 	glBindTexture(GL_TEXTURE_2D, 11);
 
-	PPMImage image13("textureSun01X.ppm");
+	PPMImage image13("sun01.ppm");
 	glGenTextures(1, &Texture[12]);
 	glBindTexture(GL_TEXTURE_2D, Texture[12]);
 	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image13.sizeX, image13.sizeY,
 		GL_RGB, GL_UNSIGNED_BYTE, image13.data);
 	glBindTexture(GL_TEXTURE_2D, 12);
 
-	PPMImage image14("textureSun02X.ppm");
+	PPMImage image14("sun03.ppm");
 	glGenTextures(1, &Texture[13]);
 	glBindTexture(GL_TEXTURE_2D, Texture[13]);
 	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image14.sizeX, image14.sizeY,
@@ -159,6 +159,48 @@ void initTexture()
 	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image19.sizeX, image19.sizeY,
 		GL_RGB, GL_UNSIGNED_BYTE, image19.data);
 	glBindTexture(GL_TEXTURE_2D, 18);
+
+	PPMImage image20("car03.ppm");
+	glGenTextures(1, &Texture[19]);
+	glBindTexture(GL_TEXTURE_2D, Texture[19]);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image20.sizeX, image20.sizeY,
+		GL_RGB, GL_UNSIGNED_BYTE, image20.data);
+	glBindTexture(GL_TEXTURE_2D, 19);
+
+	PPMImage image21("car04.ppm");
+	glGenTextures(1, &Texture[20]);
+	glBindTexture(GL_TEXTURE_2D, Texture[20]);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image21.sizeX, image21.sizeY,
+		GL_RGB, GL_UNSIGNED_BYTE, image21.data);
+	glBindTexture(GL_TEXTURE_2D, 20);
+
+	PPMImage image22("car06.ppm");
+	glGenTextures(1, &Texture[21]);
+	glBindTexture(GL_TEXTURE_2D, Texture[21]);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image22.sizeX, image22.sizeY,
+		GL_RGB, GL_UNSIGNED_BYTE, image22.data);
+	glBindTexture(GL_TEXTURE_2D, 21);
+
+	PPMImage image23("car07.ppm");
+	glGenTextures(1, &Texture[22]);
+	glBindTexture(GL_TEXTURE_2D, Texture[22]);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image23.sizeX, image23.sizeY,
+		GL_RGB, GL_UNSIGNED_BYTE, image23.data);
+	glBindTexture(GL_TEXTURE_2D, 22);
+
+	PPMImage image24("jeep01.ppm");
+	glGenTextures(1, &Texture[23]);
+	glBindTexture(GL_TEXTURE_2D, Texture[23]);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image24.sizeX, image24.sizeY,
+		GL_RGB, GL_UNSIGNED_BYTE, image24.data);
+	glBindTexture(GL_TEXTURE_2D, 23);
+
+	PPMImage image25("jeep02.ppm");
+	glGenTextures(1, &Texture[24]);
+	glBindTexture(GL_TEXTURE_2D, Texture[24]);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image25.sizeX, image25.sizeY,
+		GL_RGB, GL_UNSIGNED_BYTE, image25.data);
+	glBindTexture(GL_TEXTURE_2D, 24);
 }
 
 #endif

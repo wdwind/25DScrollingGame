@@ -71,7 +71,7 @@ public:
 		glColor3f(1.0, 1.0, 1.0); //set ball colour
 
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, Texture[5]);
+		glBindTexture(GL_TEXTURE_2D, Texture[4]);
 
 		glPushMatrix();
 			glTranslatef(ballX, ballY, ballZ); //moving it toward the screen a bit on creation
@@ -112,11 +112,11 @@ public:
 		glBegin(GL_QUADS);
 			glTexCoord2f(0, 0);
 			glVertex3f(0, 0, .5);
-			glTexCoord2f(0, 2);
+			glTexCoord2f(0, 1);
 			glVertex3f(0, .5, .5);
-			glTexCoord2f(4, 2);
+			glTexCoord2f(1, 1);
 			glVertex3f(.5, .5, .5);
-			glTexCoord2f(4, 0);
+			glTexCoord2f(1, 0);
 			glVertex3f(.5, 0, .5);
 		glEnd();
 
@@ -234,7 +234,7 @@ public:
 			}
 
 			bullets[i].drawBullet();
-			bullets[i].drawCurrentPos();
+			//bullets[i].drawCurrentPos();
 		}
 	}
 
@@ -246,7 +246,7 @@ public:
 			glColor3f(1, 1, 1);
 
 			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, Texture[showText]);
+			glBindTexture(GL_TEXTURE_2D, Texture[23]);
 
 			glScalef(2, 1, 1);
 			drawUnitCube();
@@ -255,7 +255,7 @@ public:
 			glDisable(GL_TEXTURE_2D);
 
 		glPushMatrix(); //draw the canon
-			glTranslatef(0.5, 0.5, 0.5);
+			glTranslatef(0.5, 0.5, 0.45);
 
 		//temp1.rotate = Vec3Df(0, 0, -1);
 		//temp1.translate = Vec3Df(PositionBullet[0], PositionBullet[1], PositionBullet[2]);
@@ -264,10 +264,10 @@ public:
 		//drawBullet2();
 			
 			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, Texture[showText]);
+			glBindTexture(GL_TEXTURE_2D, Texture[20]);
 
 			glRotatef(rCanon, 0, 0, -1); //control the canon
-			glScalef(1.2, 0.3, 0.3);
+			glScalef(1.2, 0.4, 0.4);
 			//glNormal3f(1, 2, 0);
 			drawUnitCube();
 

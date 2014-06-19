@@ -64,7 +64,7 @@ public:
 				//cout << translateWhenShot << endl;
 				glTranslatef(offset[0], offset[1], offset[2]);
 				glTranslatef(speedX, 0, 0);
-				speedX += 0.01;
+				speedX += 0.03;
 
 				if (speedX > 6)
 				{

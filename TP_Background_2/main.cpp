@@ -453,7 +453,7 @@ void dessinerBackground()
 			//}
 
 			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, Texture[showText]);
+			glBindTexture(GL_TEXTURE_2D, Texture[14]);
 
 			meshes[0].drawWithColors();
 
@@ -468,7 +468,7 @@ void dessinerBackground()
 		break;
     default:
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, Texture[showText]);
+		glBindTexture(GL_TEXTURE_2D, Texture[14]);
 
 		if (Vx1 < threshold)
 		{
@@ -508,7 +508,7 @@ void dessinerBackground()
 		glPushMatrix();
 			glTranslatef(Vx1, 0, -2);
 			meshes[2].draw();
-			meshes[2].drawNormals();
+			//meshes[2].drawNormals();
 			meshes[2].translate = Vec3Df(Vx1, 0, -2);
 		glPopMatrix();
 
@@ -521,7 +521,7 @@ void dessinerBackground()
 		glPushMatrix();
 			glTranslatef(Vx2, 0, -2);
 			meshes[3].draw();
-			meshes[3].drawNormals();
+			//meshes[3].drawNormals();
 			meshes[3].translate = Vec3Df(Vx2, 0, -2);
 		glPopMatrix();
 
@@ -539,20 +539,40 @@ void dessinerOther(){
 		for (int i = 0; i < enemies.size(); i++)
 		{
 			//enemies[i].move();
-			enemies[i].drawCurrentPos();
+			//enemies[i].drawCurrentPos()
 			glPushMatrix();
 			glTranslatef(enemies[i].translate[0], enemies[i].translate[1], enemies[i].translate[2]);
+
+			//glEnable(GL_TEXTURE_2D);
+			//glBindTexture(GL_TEXTURE_2D, Texture[showText]);
 			enemies[i].drawWithColors();
+			//glBindTexture(GL_TEXTURE_2D, 2);
+			//glDisable(GL_TEXTURE_2D);
+
 			glPopMatrix();
 		}
 
 		if (drawN)
 		{
-			enemies[0].drawNormals();
-			enemies[0].drawSomeP();
+			//enemies[0].drawNormals();
+			//enemies[0].drawSomeP();
 		}
 	}
 	
+
+	if (jump){
+
+		if (car.translate[1] > 0) {
+			//cout << car.translate[1] << endl; // show the real-time height
+			time1 += 0.05;
+			car.translate[1] += 0.05;
+			car.translate[1] += (-0.5*0.3)*(time1*time1);
+		}
+		else{
+			car.translate[1] = 0;
+			time1 = 0;
+		}
+	}
 
 	//b.drawCurrentPos();
 
@@ -576,7 +596,7 @@ void drawBoss(){
 		Boss = Enemy();
 		std::vector<Vec3Df> lighting;
 		Boss.resolution = 16;
-		Boss.loadBoss("monster_2_2.obj");
+		Boss.loadBoss("monster_2_3.obj");
 		lighting.resize(Boss.vertices.size());
 		Boss.lighting = lighting;
 		Boss.translate = bossStartPos;
@@ -586,7 +606,7 @@ void drawBoss(){
 	glPushMatrix();
 		
 		glTranslatef(bossStartPos[0], bossStartPos[1], bossStartPos[2]);
-		glRotatef(90, 0, -1, 0);
+		//glRotatef(90, 0, -1, 0);
 
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, Texture[17]);
@@ -827,6 +847,10 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 	case 'd':
 		car.translate += Vec3Df(0.1, 0, 0);
+		break;
+	case 'w':
+		car.translate[1] += 1;
+		jump = true;
 		break;
 	}
 

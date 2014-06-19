@@ -423,6 +423,12 @@ bool Mesh::loadBoss(const char * filename){
 		}
 	}
 
+	for (int i = 0; i < temp_vertices.size(); i++)
+	{
+		vertices.push_back(temp_vertices[i]);
+		//vertices[i].n = temp_normals[i];
+	}
+
 	for (unsigned int i = 0; i < vertexIndices.size(); i++)
 	{
 		//for (int j = 0; j < 3; j++)
@@ -431,12 +437,6 @@ bool Mesh::loadBoss(const char * filename){
 		//	vertices.push_back(temp_vertices[vertexIndex - 1]);
 		//}
 		triangles.push_back(Triangle(vertexIndices[i][0] - 1, vertexIndices[i][1] - 1, vertexIndices[i][2] - 1));
-	}
-
-	for (int i = 0; i < temp_vertices.size(); i++)
-	{
-		vertices.push_back(temp_vertices[i]);
-		vertices[i].n = temp_normals[i];
 	}
 
 	for (unsigned int i = 0; i < uvIndices.size(); i ++)
@@ -483,6 +483,7 @@ bool Mesh::loadBoss(const char * filename){
 	//	printf("TriMesh::LOAD: Unexpected number of face vertices (<3). Ignoring face");
 	//}
 
+	computeVertexNormals();
 	lighting.resize(vertices.size());
 
 	return 1;

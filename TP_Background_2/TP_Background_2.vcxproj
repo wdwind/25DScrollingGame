@@ -105,8 +105,18 @@
     <None Include="boss.ppm" />
     <None Include="boss02.ppm" />
     <None Include="brick.ppm" />
+    <None Include="car03.ppm" />
+    <None Include="car04.ppm" />
+    <None Include="car06.ppm" />
+    <None Include="car07.ppm" />
+    <None Include="car08.ppm" />
+    <None Include="car09.ppm" />
     <None Include="checker.ppm" />
+    <None Include="jeep01.ppm" />
+    <None Include="jeep02.ppm" />
     <None Include="sand.ppm" />
+    <None Include="sun01.ppm" />
+    <None Include="sun03.ppm" />
     <None Include="textureBullet01X.ppm" />
     <None Include="textureBullet02X.ppm" />
     <None Include="textureJeep01X.ppm" />
@@ -137,6 +147,11 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="monster_2_2.obj">
+      <FileType>Document</FileType>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="monster_2_3.obj">
       <FileType>Document</FileType>
     </Image>
   </ItemGroup>
