@@ -393,22 +393,38 @@ bool Mesh::loadBoss(const char * filename){
 		// else : parse lineHeader
 		if (strcmp(lineHeader, "v") == 0){
 			//glm::vec3 vertex;
+#ifdef WIN32
 			fscanf_s(file, "%f %f %fn", &x, &y, &z);
+#else
+			fscanf(file, "%f %f %fn", &x, &y, &z);
+#endif
 			temp_vertices.push_back(Vec3Df(x, y, z));
 		}
 		else if (strcmp(lineHeader, "vt") == 0){
 			//glm::vec2 uv;
+#ifdef WIN32
 			fscanf_s(file, "%f %fn", &x, &y);
+#else
+			fscanf(file, "%f %fn", &x, &y);
+#endif
 			temp_uvs.push_back(Vec3Df(x, y, 0));
 		}
 		else if (strcmp(lineHeader, "vn") == 0){
+#ifdef WIN32
 			fscanf_s(file, "%f %f %fn", &x, &y, &z);
+#else
+			fscanf(file, "%f %f %fn", &x, &y, &z);
+#endif
 			temp_normals.push_back(Vec3Df(x, y, z));
 		}
 		else if (strcmp(lineHeader, "f") == 0){
 			std::string vertex1, vertex2, vertex3;
 			unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
+#ifdef WIN32
 			int matches = fscanf_s(file, "%d/%d/%d %d/%d/%d %d/%d/%dn", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
+#else
+			int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%dn", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
+#endif
 			if (matches != 9){
 				printf("File can't be read by our simple parser : ( Try exporting with other optionsn");
 				return false;
