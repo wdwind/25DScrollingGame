@@ -180,10 +180,8 @@
     <Image Include="monster_2_2.obj">
       <Filter>资源文件</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="monster_2_3.obj">
+    <Image Include="monster_2_3.obj">
       <Filter>资源文件</Filter>
-    </Object>
+    </Image>
   </ItemGroup>
 </Project>

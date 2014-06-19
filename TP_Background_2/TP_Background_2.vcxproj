@@ -151,7 +151,9 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <Object Include="monster_2_3.obj" />
+    <Image Include="monster_2_3.obj">
+      <FileType>Document</FileType>
+    </Image>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
