@@ -56,13 +56,17 @@ public:
 			//cout << theta << endl;
 			
 			glTranslatef(origin[0], origin[1], origin[2]);
-			glRotatef(theta, rotate[0], rotate[1], rotate[2]);
 
 			if (shot)
 			{
 				Vec3Df offset = translateWhenShot - translate;
 				//cout << translateWhenShot << endl;
 				glTranslatef(offset[0], offset[1], offset[2]);
+			}
+			
+			glRotatef(theta, rotate[0], rotate[1], rotate[2]);
+			if (shot)
+			{
 				glTranslatef(speedX, 0, 0);
 				speedX += 0.03;
 
@@ -71,6 +75,8 @@ public:
 					outOfRange = true;
 				}
 			}
+
+			
 			//glTranslatef(0, 0, .23);
 			gluSphere(sphere, .1, 20, 20);
 		glPopMatrix();
