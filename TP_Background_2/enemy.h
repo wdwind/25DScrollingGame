@@ -138,11 +138,20 @@ public:
 	void claculateMaxDist(){
 		maxDist = 0;
 
+		int num = 0;
+
 		for (int i = 0; i < vertices.size(); i++)
 		{
-			float dist = Vec3Df::distance(centerPoint, vertices[i].p);
-			maxDist = (dist > maxDist) ? dist : maxDist;
+			if (fabs(vertices[i].p[0] - centerPoint[0]) < 0.5)
+			{
+				float dist = Vec3Df::distance(centerPoint, vertices[i].p);
+				//maxDist = (dist > maxDist) ? dist : maxDist;
+				maxDist += dist;
+				num++;
+			}
 		}
+
+		maxDist /= num;
 	}
 
 	Vec3Df getCurrentPos(){
