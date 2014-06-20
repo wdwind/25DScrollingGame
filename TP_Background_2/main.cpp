@@ -678,6 +678,32 @@ void enemiesType(){
 	}
 }
 
+void printHelp(){
+	cout << "Welcome to 2.5D Shooter game!" << endl;
+	cout << "We are Feng Wang, Xiaopeng Li, and Shuheng Shen." << endl;
+	cout << "" << endl;
+	cout << "Press number 1 to 5 to change the lighting mode" << endl;
+	cout << "  1: no lighting mode" << endl;
+	cout << "  2: diffuse lighting" << endl;
+	cout << "  3: specular lighting" << endl;
+	cout << "  4: combined lighting (Phong model)" << endl;
+	cout << "  5: Toon lighting" << endl;
+	cout << "" << endl;
+	cout << "Press l to change the light position to the camera position" << endl;
+	cout << "Press t, y, u, i, o, p to move the light" << endl;
+	cout << "Press N to reset all lights" << endl;
+	cout << "Press x and z to move the terrian" << endl;
+	cout << "Press . and , to rotate the cannon" << endl;
+	cout << "Press j to shoot" << endl;
+	cout << "Press a and d to move the car" << endl;
+	cout << "Press w to jump" << endl;
+	cout << "Press s to compute the shadows" << endl;
+	cout << "" << endl;
+	cout << "For testing:" << endl;
+	cout << "Press c to change the texture" << endl;
+	cout << "Press b to enter the debug mode" << endl;
+	cout << "" << endl;
+}
 
 /************************************************************
 * Programme principal
@@ -689,6 +715,7 @@ int main(int argc, char** argv)
 	background();
 	init();
 	computeLighting();
+	printHelp();
 
 	// layers of the framebuffer used by the application
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
@@ -757,7 +784,7 @@ void keyboard(unsigned char key, int x, int y)
 	// Press number 1 to 5 to change the lighting mode
 	// 1: no lighting mode
 	// 2: diffuse lighting
-	// 3: secular lighting
+	// 3: specular lighting
 	// 4: combined lighting (Phong model)
 	// 5: Toon lighting
 	if (key>'0'&& key <= '7')
