@@ -753,6 +753,13 @@ void keyboard(unsigned char key, int x, int y)
 {
 	printf("key %d pressed at %d,%d\n", key, x, y);
 	fflush(stdout);
+
+	// Press number 1 to 5 to change the lighting mode
+	// 1: no lighting mode
+	// 2: diffuse lighting
+	// 3: secular lighting
+	// 4: combined lighting (Phong model)
+	// 5: Toon lighting
 	if (key>'0'&& key <= '7')
 	{
 		mode = Mode(key - '1');
@@ -775,6 +782,7 @@ void keyboard(unsigned char key, int x, int y)
 	//case 'B':
 	//	break;
 
+	// Press l to change the light position to the camera position
 	case 'l':
 	{
 				LightPos[SelectedLight] = getCameraPosition();
@@ -807,8 +815,9 @@ void keyboard(unsigned char key, int x, int y)
 				return;
 	}
 
+	// Press N to reset all lights
 	case 'N':
-	{	//reset all lights
+	{	
 				LightPos.resize(1);
 				LightPos[0] = defaultLightPos;
 				LightColor.resize(1);
@@ -817,58 +826,86 @@ void keyboard(unsigned char key, int x, int y)
 				SelectedLight = 0;
 	}
 
+	// Press [ to update lighing (only useful for slow computers)
 	case '[':
 	{
-				//update lighing (only useful for slow computers)
 				computeLighting();
 				return;
 	}
+
+	// Press x to move the terrian
 	case 'x':
 		Vx1 += 0.1;
 		Vx2 += 0.1;
 		cout << Vx1 << endl;
 		break;
+
+	// Press z to move the terrian
 	case 'z':
 		Vx1 -= 0.1;
 		Vx2 -= 0.1;
 		cout << Vx1 << endl;
 		break;
+
+	// Press c to change the texture
+	// For testing
 	case 'c':
 		//cout << showText << endl;
 		showText = (++temp) % maxTex;
 		break;
+
+	// Press b to enter the debug mode
+	// For testing
 	case 'b':
 		debug = true;
 		car.debugInCar = true;
 		break;
+
+	// Press B to quit the debug mode
+	// For testing
 	case 'B':
 		debug = false;
 		car.debugInCar = false;
 		break;
+
+	// Useless
 	case 'q':
 		drawCar = true;
 		break;
+
+	// Press . to rotate the cannon
 	case '.':
 		car.canonClock();
 		break;
+
+	// Press , to rotate the cannon
 	case ',':
 		car.canonCounter();
 		break;
+
+	// Press j to shoot
 	case 'j':
 		shot = true;
 		car.shotBullet();
 		break;
+
+	// Press a to move the car
 	case 'a':
 		car.translate -= Vec3Df(0.1, 0, 0);
 		break;
+
+	// Press d to move the car
 	case 'd':
 		car.translate += Vec3Df(0.1, 0, 0);
 		break;
+
+	// Press w to jump
 	case 'w':
 		car.translate[1] += 1;
 		jump = true;
 		break;
 
+	// Press t, y, u, i, o, p to move the light
 	case 't':
 		LightPos[0][0] -= 0.1;
 		light = Light(LightPos[0], defaultLightColor, lightPower, s);
@@ -894,6 +931,7 @@ void keyboard(unsigned char key, int x, int y)
 		light = Light(LightPos[0], defaultLightColor, lightPower, s);
 		break;
 
+	// Press s to compute the shadows
 	case 's':
 		//shading = true;
 		computeShadows();
