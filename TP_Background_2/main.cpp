@@ -9,7 +9,7 @@
 #include "mesh.h"
 #include "loadppm.h"
 #include "car.h"
-//#include "move.h"
+#include "move.h"
 #include "utils.h"
 #include "enemy.h"
 #include "bullet.h"
@@ -24,8 +24,9 @@ void keyboard(unsigned char key, int x, int y);
 void display(void);
 void reshape(int w, int h);
 
-int test = 0;
-
+/************************************************************
+* Fonctions compute lighting
+************************************************************/
 void computeLighting()
 {
 	for (int j = 0; j < meshes.size(); j++)
@@ -34,9 +35,16 @@ void computeLighting()
 
 		for (unsigned int i = 0; i<meshes[j].vertices.size(); ++i)
 		{
-			(*result)[i] = Vec3Df();
-			for (int l = 0; l < LightPos.size(); ++l)
-				(*result)[i] += Mesh::computeLighting(meshes[j].vertices[i].p + meshes[j].translate, meshes[j].vertices[i].n, light, CamPos, mode);
+			(*result)[i] = Vec3Df(0, 0, 0);
+			if (!meshes[j].shadow.empty())
+			{
+				if (std::find(meshes[j].shadow.begin(), meshes[j].shadow.end(), i) != meshes[j].shadow.end())
+				{
+					//cout << i << endl;
+					continue;
+				}
+			}
+			(*result)[i] += Mesh::computeLighting(meshes[j].vertices[i].p + meshes[j].translate, meshes[j].vertices[i].n, light, CamPos, mode);
 		}
 	}
 
@@ -47,8 +55,7 @@ void computeLighting()
 		for (unsigned int i = 0; i<enemies[j].vertices.size(); ++i)
 		{
 			(*result)[i] = Vec3Df();
-			for (int l = 0; l < LightPos.size(); ++l)
-				(*result)[i] += Mesh::computeLighting(enemies[j].vertices[i].p + enemies[j].translate, enemies[j].vertices[i].n, light, CamPos, mode);
+			(*result)[i] += Mesh::computeLighting(enemies[j].vertices[i].p + enemies[j].translate, enemies[j].vertices[i].n, light, CamPos, mode);
 		}
 	}
 
@@ -59,8 +66,7 @@ void computeLighting()
 		for (unsigned int i = 0; i<Boss.vertices.size(); ++i)
 		{
 			(*result)[i] = Vec3Df();
-			for (int l = 0; l < LightPos.size(); ++l)
-				(*result)[i] += Mesh::computeLighting(Boss.vertices[i].p + Boss.translate, Boss.vertices[i].n, light, CamPos, mode);
+			(*result)[i] += Mesh::computeLighting(Boss.vertices[i].p + Boss.translate, Boss.vertices[i].n, light, CamPos, mode);
 		}
 	}
 }
@@ -90,26 +96,12 @@ void computeLighting()
 //	}
 //}
 
-void collisionDetect2(){
-	//for (int i = 0; i < car.bullets.size(); i++)
-	//{
-	//	for (int j = 0; j < enemies.size(); j++)
-	//	{
-	//		Vec3Df bPos = car.bullets[i].getCurrentPos();
-	//		Vec3Df ePos = enemies[j].getCurrentPos();
 
-	//		if ((bPos - ePos).getLength() <= enemies[j].maxDist)
-	//		{
-	//			car.bullets.erase(car.bullets.begin() + i);
-	//			//enemies.erase(enemies.begin() + j);
-	//			if (!enemies[j].Shot())
-	//			{
-	//				enemies.erase(enemies.begin() + j);
-	//				destroyedE++;
-	//			}
-	//		}
-	//	}
-	//}
+/************************************************************
+* Fonctions collision detection
+* Used to detect the collision of the bulltes and the enemy
+************************************************************/
+void collisionDetect2(){
 	if (!enemies.empty())
 	{
 		for (vector<Enemy>::iterator it2 = enemies.begin(); it2 != enemies.end();)
@@ -124,7 +116,6 @@ void collisionDetect2(){
 		}
 	}
 	
-
 	if (Boss.disappear)
 	{
 		boss = 100;
@@ -176,7 +167,6 @@ void collisionDetect2(){
 		}
 	}
 
-
 	for (vector<Bullet>::iterator it1 = car.bullets.begin(); it1 != car.bullets.end();)
 	{
 		bool match = false;
@@ -197,7 +187,6 @@ void collisionDetect2(){
 			}
 
 			cout << "hit boss" << endl;
-			test++;
 		}
 
 		if (match)
@@ -220,33 +209,7 @@ void animate()
 	Vx1 -= backgroundSpeed;
 	Vx2 -= backgroundSpeed;
 
-	//if (carMove){
-	//	car.rBall += car.incrementOfrball;
-	//}
-
 	car.rBall += car.incrementOfrball;
-
-	/*if (temp1) {
-		int t = 1;
-		while (t < 100) {
-			t += 1;
-			car.angleUpper += .001;
-			car.angleFore += 0.05;
-			car.angleHand -= .005;
-		}
-	}
-
-	if (temp2) {
-		glPushMatrix();
-		glTranslatef(0, 0, 1.5);
-		car.angleFore += car.incrementAngle;
-		if (car.angleFore >= 100 || car.angleFore <= 30){
-			car.incrementAngle = -car.incrementAngle;
-		}
-		glPopMatrix();
-	}*/
-
-	//collisionDetect();
 }
 
 
@@ -282,6 +245,9 @@ void init(){
 	//computeLighting();
 }
 
+/************************************************************
+* Fonctions to initialize the background
+************************************************************/
 void background(){
 	Mesh MyMesh;
 	std::vector<Vec3Df> lighting;
@@ -318,39 +284,62 @@ void background(){
 	meshes[3].lighting = lighting4;
 }
 
-void dessinerBackground();
-void dessinerOther();
+void drawBackground();
+void drawOther();
 void drawBoss();
+void computeShadows();
 
-/************************************************************
-* Management functions opengl? Do not touch
-************************************************************/
 // Display actions 
-// Do not change
 void display(void)
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // la couleur et le z
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glLoadIdentity();  // repere camera
+	glLoadIdentity();
 
-	tbVisuTransform(); // origine et orientation de la scene
+	tbVisuTransform(); 
 
-	dessinerBackground();
+	drawBackground();
 
-	dessinerOther();
+	drawOther();
+
+	if (debug)
+	{
+		glBegin(GL_LINES);
+		glColor3f(1, 1, 1);
+		glVertex3f(0, 0, 0);
+		glVertex3f(light.lightPos[0], light.lightPos[1], light.lightPos[2]);
+		glEnd();
+
+		if (!shadeLine.empty())
+		{
+			for (int i = 0; i < shadeLine.size(); i++)
+			{
+				glBegin(GL_LINES);
+				glColor3f(1, 0, 0);
+				glVertex3f(light.lightPos[0], light.lightPos[1], light.lightPos[2]);
+				glVertex3f(meshes[(int)shadeLine[i][0]].vertices[(int)shadeLine[i][1]].p[0] + meshes[(int)shadeLine[i][0]].translate[0], meshes[(int)shadeLine[i][0]].vertices[(int)shadeLine[i][1]].p[1] + meshes[(int)shadeLine[i][0]].translate[1], meshes[(int)shadeLine[i][0]].vertices[(int)shadeLine[i][1]].p[2] + meshes[(int)shadeLine[i][0]].translate[2]);
+				glEnd();
+			}
+		}
+	}
 
 	if (boss == 1)
 	{
 		drawBoss();
 	}
 
+	if (shading)
+	{
+		computeShadows();
+	}
+
 	glutSwapBuffers();
 }
 
 /************************************************************
- * Call different drawing functions
+ * Function to DRAW the background
 ************************************************************/
-void dessinerBackground()
+void drawBackground()
 {
 	glPointSize(10);
 
@@ -358,7 +347,7 @@ void dessinerBackground()
 	glPushMatrix();
 
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, Texture[2]);
+	glBindTexture(GL_TEXTURE_2D, Texture[sunTex]);
 		glColor3f(1, 0, 0);
 		glTranslatef(LightPos[0][0], LightPos[0][1], LightPos[0][2]);
 		gluSphere(sphere, .5, 50, 50);
@@ -371,24 +360,24 @@ void dessinerBackground()
 	if (boss == 1)
 	{
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, Texture[1]);
+		glBindTexture(GL_TEXTURE_2D, Texture[bossBackgroundTex]);
 		gluSphere(sphere, 5.0, 20, 20);
 		glBindTexture(GL_TEXTURE_2D, 2);
 		glDisable(GL_TEXTURE_2D);
 	}
 
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, Texture[0]);
-		glColor3f(1, 1, 1);
-		//gluSphere(sphere, .5, 20, 20);
-	glBindTexture(GL_TEXTURE_2D, 2);
-	glDisable(GL_TEXTURE_2D);
+	//glEnable(GL_TEXTURE_2D);
+	//glBindTexture(GL_TEXTURE_2D, Texture[0]);
+	//	glColor3f(1, 1, 1);
+	//	//gluSphere(sphere, .5, 20, 20);
+	//glBindTexture(GL_TEXTURE_2D, 2);
+	//glDisable(GL_TEXTURE_2D);
 
 	// Draw distant view
 	glPushMatrix();
 
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, Texture[11]);
+		glBindTexture(GL_TEXTURE_2D, Texture[distantBackgroundTex]);
 
 		glColor3f(1, 1, 1);
 		glTranslatef(-5, 0, -5);
@@ -411,64 +400,38 @@ void dessinerBackground()
 
 	glPopMatrix();
 
-
-	// Draw front view
-	//glPushMatrix();
-
-	//	glEnable(GL_TEXTURE_2D);
-	//	glBindTexture(GL_TEXTURE_2D, Texture[showText]);
-
-	//	glColor3f(1, 1, 1);
-	//	glTranslatef(-5, 0, 2);
-	//	glNormal3f(0, 0, 1);
-	//	//glScalef(40, 40, 40);
-
-	//	glBegin(GL_QUADS);
-	//	glTexCoord2f(-5, 0);
-	//	glVertex3f(-5, 0, 0);
-	//	glTexCoord2f(-5, -1);
-	//	glVertex3f(-5, -1, 0);
-	//	glTexCoord2f(15, -1);
-	//	glVertex3f(15, -1, 0);
-	//	glTexCoord2f(15, 0);
-	//	glVertex3f(15, 0, 0);
-	//	glEnd();
-
-	//	glBindTexture(GL_TEXTURE_2D, 2);
-	//	glDisable(GL_TEXTURE_2D);
-
-	//glPopMatrix();
-
 	switch( mode )
     {
-    case ORIGINAL_LIGHTING:
-		{
-			Vec3Df p;
-			//if (ShowSelectedVertex&&SelectedVertex>=0)
-			//{
-			//	p=meshes[0].vertices[SelectedVertex].p;
-			//	glBegin(GL_POINTS);
-			//	glVertex3f(p[0],p[1],p[2]);
-			//	glEnd();
-			//}
+  //  case ORIGINAL_LIGHTING:
+		//{
+		//	Vec3Df p;
+		//	//if (ShowSelectedVertex&&SelectedVertex>=0)
+		//	//{
+		//	//	p=meshes[0].vertices[SelectedVertex].p;
+		//	//	glBegin(GL_POINTS);
+		//	//	glVertex3f(p[0],p[1],p[2]);
+		//	//	glEnd();
+		//	//}
 
-			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, Texture[14]);
+		//	glEnable(GL_TEXTURE_2D);
+		//	glBindTexture(GL_TEXTURE_2D, Texture[14]);
 
-			meshes[0].drawWithColors();
+		//	meshes[0].drawWithColors();
 
-			glTranslatef(3,0,0);
-			meshes[1].drawWithColors();
+		//	glTranslatef(3,0,0);
+		//	meshes[1].drawWithColors();
 
-			meshes[2].drawWithColors();
+		//	meshes[2].drawWithColors();
 
-			glBindTexture(GL_TEXTURE_2D, 2);
-			glDisable(GL_TEXTURE_2D);
-		}
-		break;
+		//	glBindTexture(GL_TEXTURE_2D, 2);
+		//	glDisable(GL_TEXTURE_2D);
+		//}
+		//break;
     default:
+
+		// DRAW terrain
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, Texture[14]);
+		glBindTexture(GL_TEXTURE_2D, Texture[terrainTex]);
 
 		if (Vx1 < threshold)
 		{
@@ -502,13 +465,17 @@ void dessinerBackground()
 		glDisable(GL_TEXTURE_2D);
 
 
+		// DRAW road
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, Texture[8]);
+		glBindTexture(GL_TEXTURE_2D, Texture[roadTex]);
 
 		glPushMatrix();
 			glTranslatef(Vx1, 0, -2);
 			meshes[2].draw();
-			//meshes[2].drawNormals();
+			if (debug)
+			{
+				meshes[2].drawNormals();
+			}
 			meshes[2].translate = Vec3Df(Vx1, 0, -2);
 		glPopMatrix();
 
@@ -516,12 +483,15 @@ void dessinerBackground()
 		glDisable(GL_TEXTURE_2D);
 
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, Texture[8]);
+		glBindTexture(GL_TEXTURE_2D, Texture[roadTex]);
 
 		glPushMatrix();
 			glTranslatef(Vx2, 0, -2);
 			meshes[3].draw();
-			//meshes[3].drawNormals();
+			if (debug)
+			{
+				meshes[3].drawNormals();
+			}
 			meshes[3].translate = Vec3Df(Vx2, 0, -2);
 		glPopMatrix();
 
@@ -532,14 +502,21 @@ void dessinerBackground()
     }
 }
 
-void dessinerOther(){
+/************************************************************
+* Fonctions to DRAW other stuff (like enemy, and car)
+************************************************************/
+void drawOther(){
 
 	if (!enemies.empty())
 	{
 		for (int i = 0; i < enemies.size(); i++)
 		{
-			//enemies[i].move();
-			//enemies[i].drawCurrentPos()
+			if (debug)
+			{
+				enemies[i].drawNormals();
+				enemies[i].drawCurrentPos();
+			}
+
 			glPushMatrix();
 			glTranslatef(enemies[i].translate[0], enemies[i].translate[1], enemies[i].translate[2]);
 
@@ -550,12 +527,6 @@ void dessinerOther(){
 			//glDisable(GL_TEXTURE_2D);
 
 			glPopMatrix();
-		}
-
-		if (drawN)
-		{
-			//enemies[0].drawNormals();
-			//enemies[0].drawSomeP();
 		}
 	}
 	
@@ -574,22 +545,19 @@ void dessinerOther(){
 		}
 	}
 
-	//b.drawCurrentPos();
-
-	//glEnable(GL_TEXTURE_2D);
-	//glBindTexture(GL_TEXTURE_2D, Texture[4]);
 	glPushMatrix();
 		glTranslatef(car.translate[0], car.translate[1], car.translate[2]);
 
-		if (drawC)
+		if (drawCar)
 			car.drawCar();
 
 	glPopMatrix();
 
-	//glBindTexture(GL_TEXTURE_2D, 2);
-	//glDisable(GL_TEXTURE_2D);
 }
 
+/************************************************************
+* Fonctions to DRAW boss
+************************************************************/
 void drawBoss(){
 	if (Boss.vertices.empty() && boss == 1)
 	{
@@ -609,12 +577,58 @@ void drawBoss(){
 		//glRotatef(90, 0, -1, 0);
 
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, Texture[17]);
+		glBindTexture(GL_TEXTURE_2D, Texture[bossTex]);
 		Boss.drawBoss();
 		glBindTexture(GL_TEXTURE_2D, 2);
 		glDisable(GL_TEXTURE_2D);
 
 	glPopMatrix();
+}
+
+
+/************************************************************
+* Fonctions to compute the shadows
+************************************************************/
+void computeShadows()
+{
+	std::vector<RealTriangle> eTriangles;
+	//eTriangles.resize(enemies[0].triangles.size() + enemies[1].triangles.size());
+	shadeLine.clear();
+
+	for (int i = 0; i < enemies.size(); i++)
+	{
+		for (int j = 0; j < enemies[i].triangles.size(); j++)
+		{
+			Vec3Df v1 = enemies[i].vertices[enemies[i].triangles[j].v[0]].p + enemies[i].translate + enemies[i].origin;
+			Vec3Df v2 = enemies[i].vertices[enemies[i].triangles[j].v[1]].p + enemies[i].translate + enemies[i].origin;
+			Vec3Df v3 = enemies[i].vertices[enemies[i].triangles[j].v[2]].p + enemies[i].translate + enemies[i].origin;
+			RealTriangle r = RealTriangle();
+			r.set(v1, v2, v3);
+			//eTriangles[ind] = r;
+			eTriangles.push_back(r);
+		}
+	}
+
+	//function to compute shadows of the terrain
+	for (int j = 0; j < 2; j++)
+	{
+		meshes[j].shadow.clear();
+		for (int i = 0; i < meshes[j].vertices.size(); i++)
+		{
+			Vec3Df vertex = meshes[j].vertices[i].p + meshes[j].translate;
+			
+			for (int k = 0; k < eTriangles.size(); k++)
+			{
+				if (1 == intersect3D_RayTriangle(vertex, light.lightPos, eTriangles[k]))
+				{
+					meshes[j].lighting[i] = Vec3Df(0, 0, 0);
+					meshes[j].shadow.push_back((unsigned int)i);
+					shadeLine.push_back(Vec3Df(j, i, 0));
+					break;
+				}
+			}
+		}
+	}
 }
 
 void enemiesType();
@@ -628,23 +642,31 @@ void idle()
 
 	collisionDetect2();
 
-
 	enemiesType();
 
-
 	glutPostRedisplay();
-
 
 	animate();
 
 }
 
+/************************************************************
+* Fonctions to detect the type of the enemy
+************************************************************/
 void enemiesType(){
 	if (enemies.size() < 2 && destroyedE < 20)
 	{
 		Enemy enemy;
 		enemy.loadMesh("enemy.obj");
-		enemy.translate = enemyStartPos;
+		if (enemies[0].translate == enemyStartPos)
+		{
+			enemy.translate = enemyStartPos2;
+		}
+		else
+		{
+			enemy.translate = enemyStartPos;
+		}
+		
 		enemies.push_back(enemy);
 	}
 	if (destroyedE > 3 && boss == 0)
@@ -716,7 +738,6 @@ int main(int argc, char** argv)
 }
 
 
-
 // to change the size or desiconification
 void reshape(int w, int h)
 {
@@ -741,26 +762,23 @@ void keyboard(unsigned char key, int x, int y)
 
 	switch (key)
 	{
-		//A remplir
-	case 'r':
-		break;
-	case 'R':
-		break;
-	case 'g':
-		break;
-	case 'G':
-		break;
-	case 'b':
-		drawB = true;
-		break;
-	case 'B':
-		break;
+	//case 'r':
+	//	break;
+	//case 'R':
+	//	break;
+	//case 'g':
+	//	break;
+	//case 'G':
+	//	break;
+	//case 'b':
+	//	break;
+	//case 'B':
+	//	break;
 
-
-		//less important
 	case 'l':
 	{
 				LightPos[SelectedLight] = getCameraPosition();
+				light.lightPos = LightPos[SelectedLight];
 				return;
 	}
 	case 'L':
@@ -783,7 +801,7 @@ void keyboard(unsigned char key, int x, int y)
 					SelectedLight = LightPos.size() - 1;
 				return;
 	}
-	case 'U':
+	case '{':
 	{
 				updateAlways = !updateAlways;
 				return;
@@ -794,11 +812,12 @@ void keyboard(unsigned char key, int x, int y)
 				LightPos.resize(1);
 				LightPos[0] = defaultLightPos;
 				LightColor.resize(1);
-				LightColor[0] = Vec3Df(1, 1, 1);
+				LightColor[0] = defaultLightColor;
+				light = Light(defaultLightPos, defaultLightColor, lightPower, s);
 				SelectedLight = 0;
 	}
 
-	case 'u':
+	case '[':
 	{
 				//update lighing (only useful for slow computers)
 				computeLighting();
@@ -818,25 +837,22 @@ void keyboard(unsigned char key, int x, int y)
 		//cout << showText << endl;
 		showText = (++temp) % maxTex;
 		break;
-	case 'n':
-		//cout << showText << endl;
-		drawN = true;
+	case 'b':
+		debug = true;
+		car.debugInCar = true;
+		break;
+	case 'B':
+		debug = false;
+		car.debugInCar = false;
 		break;
 	case 'q':
-		cout << "draw car" << endl;
-		drawC = true;
+		drawCar = true;
 		break;
 	case '.':
 		car.canonClock();
 		break;
 	case ',':
 		car.canonCounter();
-		break;
-	case 'v':
-		temp1 = true;
-		break;
-	case 'f':
-		temp2 = true;
 		break;
 	case 'j':
 		shot = true;
@@ -851,6 +867,36 @@ void keyboard(unsigned char key, int x, int y)
 	case 'w':
 		car.translate[1] += 1;
 		jump = true;
+		break;
+
+	case 't':
+		LightPos[0][0] -= 0.1;
+		light = Light(LightPos[0], defaultLightColor, lightPower, s);
+		break;
+	case 'y':
+		LightPos[0][0] += 0.1;
+		light = Light(LightPos[0], defaultLightColor, lightPower, s);
+		break;
+	case 'u':
+		LightPos[0][1] -= 0.1;
+		light = Light(LightPos[0], defaultLightColor, lightPower, s);
+		break;
+	case 'i':
+		LightPos[0][1] += 0.1;
+		light = Light(LightPos[0], defaultLightColor, lightPower, s);
+		break;
+	case 'o':
+		LightPos[0][2] -= 0.1;
+		light = Light(LightPos[0], defaultLightColor, lightPower, s);
+		break;
+	case 'p':
+		LightPos[0][2] += 0.1;
+		light = Light(LightPos[0], defaultLightColor, lightPower, s);
+		break;
+
+	case 's':
+		//shading = true;
+		computeShadows();
 		break;
 	}
 

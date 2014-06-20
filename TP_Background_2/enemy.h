@@ -5,14 +5,14 @@
 #include "Vec3D.h"
 #include "grid.h"
 
+/************************************************************
+* Class enemy
+* Child class of Mesh
+************************************************************/
 class Enemy : public Mesh{
 public:
 	Enemy(){}
 	Enemy(Vec3Df v) : origin (v) {};
-
-	//void calculateCenter();
-	//void claculateMaxDist();
-	//bool loadMesh(const char * filename);
 
 	Vec3Df centerPoint = Vec3Df(0, 0, 0);
 	Vec3Df origin = Vec3Df(0, 0, 0);
@@ -34,6 +34,10 @@ public:
 	float explosionDist = 0;
 	bool disappear = false;
 
+	/************************************************************
+	* Fonctions load mesh
+	* After loading, the simplified mesh should be computed
+	************************************************************/
 	bool loadMesh(const char * filename){
 		Mesh::loadMesh(filename);
 		Mesh::computeBoundingCube();
@@ -77,6 +81,10 @@ public:
 		return 1;
 	}
 
+	/************************************************************
+	* Fonctions load boss
+	* After loading, the simplified mesh should be computed
+	************************************************************/
 	bool loadBoss(const char * filename){
 		Mesh::loadBoss(filename);
 		Mesh::computeBoundingCube();
@@ -120,10 +128,17 @@ public:
 		return 1;
 	}
 
+	/************************************************************
+	* Fonctions check repeat
+	* Used in simplification
+	************************************************************/
 	bool checkRepeat(int *indices){
 		return (indices[0] == indices[1] || indices[1] == indices[2] || indices[0] == indices[2]);
 	}
 
+	/************************************************************
+	* Fonctions calculate center, calculate the center of the mesh
+	************************************************************/
 	void calculateCenter(){
 		centerPoint = Vec3Df(0, 0, 0);
 
@@ -154,12 +169,21 @@ public:
 		maxDist /= num;
 	}
 
+	/************************************************************
+	* Fonctions get current position of the mesh
+	* Return absolute coords
+	* Used in testing
+	************************************************************/
 	Vec3Df getCurrentPos(){
 		Vec3Df cp = origin + translate + centerPoint;
 
 		return cp;
 	}
 
+	/************************************************************
+	* Fonctions move
+	* Randomly moving
+	************************************************************/
 	void move(){
 		int randomvalX = rand() % 3 - 1;
 		int randomvalY = rand() % 3 - 1;
@@ -167,6 +191,10 @@ public:
 		translate = translate + Vec3Df(randomvalX*speed, randomvalY*speed, 0);
 	}
 
+	/************************************************************
+	* Fonctions draw current position
+	* Used in testing
+	************************************************************/
 	void drawCurrentPos(){
 		glBegin(GL_LINES);
 
@@ -178,6 +206,22 @@ public:
 		glEnd();
 	}
 
+	/************************************************************
+	* Fonctions draw normals
+	* For testing
+	************************************************************/
+	void drawNormals(){
+		Vec3Df cp = getCurrentPos();
+		glPushMatrix();
+			glTranslatef(cp[0], cp[1], cp[2]);
+			Mesh::drawNormals();
+		glPopMatrix();
+	}
+
+	/************************************************************
+	* Fonctions shot
+	* If the enemy is shot, it will be simplified until to a single point
+	************************************************************/
 	bool Shot(){
 		if (resolution < 2)
 		{
@@ -196,7 +240,7 @@ public:
 		if (resolution <= 0)
 			resolution = 1;
 
-		cout << resolution << endl;
+		//cout << resolution << endl;
 
 		grid1 = Grid(this->bbOrigin, this->bbEdgeSize, resolution);
 		grid1.putVertices(vertices);
@@ -232,6 +276,10 @@ public:
 		return true;
 	}
 
+	/************************************************************
+	* Fonctions explode
+	* After being shot for a few times, the enemy will explode 
+	************************************************************/
 	bool explode(){
 		if (!Explode)
 		{
@@ -295,6 +343,7 @@ public:
 
 		return true;
 	}
+
 
 	void drawWithColors(){
 		if (Explode)

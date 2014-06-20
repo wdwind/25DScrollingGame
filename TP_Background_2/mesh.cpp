@@ -13,11 +13,9 @@ Mesh::Mesh(){}
 using namespace std;
 
 /************************************************************
- * Fonction de calcul du cube englobant le maillage
+ * Fonction compute bounding cube
  ************************************************************/
 void Mesh::computeBoundingCube() {
-	//A completer trouver bbOrigin = (xmin, ymin, zmin) du bounding cube et bbEdgeSize
-	//A supplement find bbOrigin = (xmin, ymin, zmin) of the bounding cube and bbEdgeSize
 	bbOrigin = vertices[0].p;
 	Vec3Df Max = vertices[0].p;
 
@@ -44,14 +42,14 @@ void Mesh::computeBoundingCube() {
 
 
 /************************************************************
- * Fonctions de calcul des normales pour chaque sommet
+ * Fonctions compute vertex normals
  ************************************************************/
 void Mesh::computeVertexNormals () {
-    //initialisation des normales des vertex
+    // Initialisation
     for (unsigned int i = 0; i < vertices.size (); i++)
         vertices[i].n = Vec3Df (0.0, 0.0, 0.0);
 
-    //Somme des normales du 1 voisinage du vertex
+    // Sum
     for (unsigned int i = 0; i < triangles.size (); i++) {
         Vec3Df edge01 = vertices[triangles[i].v[1]].p -  vertices[triangles[i].v[0]].p;
         Vec3Df edge02 = vertices[triangles[i].v[1]].p -  vertices[triangles[i].v[2]].p;
@@ -86,7 +84,7 @@ void Mesh::centerAndScaleToUnit () {
 
 
 /************************************************************
- * Fonctions de dessin
+ * Fonctions draw
  ************************************************************/
 void Mesh::drawSmooth(){
 
@@ -103,6 +101,9 @@ void Mesh::drawSmooth(){
     glEnd();
 }
 
+/************************************************************
+* Fonctions draw
+************************************************************/
 void Mesh::drawWithColors(const std::vector<Vec3Df> & colors){
 
     glBegin(GL_TRIANGLES);
@@ -125,6 +126,9 @@ void Mesh::drawWithColors(const std::vector<Vec3Df> & colors){
     glEnd();
 }
 
+/************************************************************
+* Fonctions draw
+************************************************************/
 void Mesh::drawWithColors(){
 	std::vector<Vec3Df> & colors = lighting;
 
@@ -205,66 +209,67 @@ bool testIntersect(const Vec3Df & src, const Vec3Df & dir,
 	return true;
 }
 
+//int Mesh::getClosestVertexIndex(const Vec3Df & origin, const Vec3Df & direction)
+//{
+//	//float minT=FLT_MAX;
+//	//float minBeta=FLT_MAX;
+//	//float minGamma=FLT_MAX;
+//	//unsigned int minFh=0;
+//
+//	//float tT=FLT_MAX;
+//	//float betaT=FLT_MAX;
+//	//float gammaT=FLT_MAX;
+//	//bool hit=false;
+//
+//	//for (unsigned int i=0; i<triangles.size();++i)
+//	//{
+//	//	if (testIntersect(origin, direction, vertices[triangles[i].v[0]].p, vertices[triangles[i].v[1]].p, vertices[triangles[i].v[2]].p, &betaT, &gammaT, &tT))
+//	//	{
+//	//		hit=true;
+//	//		if (tT<minT)
+//	//		{
+//	//			minT=tT;
+//	//			minBeta=betaT;
+//	//			minGamma=gammaT;
+//	//			minFh=i;
+//	//		}
+//	//	}
+//	//}
+//
+//	//float beta, gamma, t;
+//	//int fh=minFh;
+//	//
+//	//beta=minBeta;
+//	//gamma=minGamma;
+//	//t=minT;
+//	//fh=minFh;
+//	//
+//	//if (hit)
+//	//{
+//	//	if (beta<0.5)
+//	//	{
+//	//		//p0 or p2
+//	//		if(gamma<0.5)
+//	//			return triangles[minFh].v[0];
+//	//		else
+//	//			return triangles[minFh].v[2];
+//	//	}
+//	//	else
+//	//	{
+//	//		if(gamma<0.5)
+//	//			return triangles[minFh].v[1];
+//	//		else
+//	//			return triangles[minFh].v[2];
+//	//	}
+//	//}
+//	//else
+//		return -1;
+//	
+//}	
 
-
-int Mesh::getClosestVertexIndex(const Vec3Df & origin, const Vec3Df & direction)
-{
-	//float minT=FLT_MAX;
-	//float minBeta=FLT_MAX;
-	//float minGamma=FLT_MAX;
-	//unsigned int minFh=0;
-
-	//float tT=FLT_MAX;
-	//float betaT=FLT_MAX;
-	//float gammaT=FLT_MAX;
-	//bool hit=false;
-
-	//for (unsigned int i=0; i<triangles.size();++i)
-	//{
-	//	if (testIntersect(origin, direction, vertices[triangles[i].v[0]].p, vertices[triangles[i].v[1]].p, vertices[triangles[i].v[2]].p, &betaT, &gammaT, &tT))
-	//	{
-	//		hit=true;
-	//		if (tT<minT)
-	//		{
-	//			minT=tT;
-	//			minBeta=betaT;
-	//			minGamma=gammaT;
-	//			minFh=i;
-	//		}
-	//	}
-	//}
-
-	//float beta, gamma, t;
-	//int fh=minFh;
-	//
-	//beta=minBeta;
-	//gamma=minGamma;
-	//t=minT;
-	//fh=minFh;
-	//
-	//if (hit)
-	//{
-	//	if (beta<0.5)
-	//	{
-	//		//p0 or p2
-	//		if(gamma<0.5)
-	//			return triangles[minFh].v[0];
-	//		else
-	//			return triangles[minFh].v[2];
-	//	}
-	//	else
-	//	{
-	//		if(gamma<0.5)
-	//			return triangles[minFh].v[1];
-	//		else
-	//			return triangles[minFh].v[2];
-	//	}
-	//}
-	//else
-		return -1;
-	
-}	
-
+/************************************************************
+* Fonctions draw
+************************************************************/
 void Mesh::draw(){
     //glBegin(GL_TRIANGLES);
 
@@ -281,8 +286,6 @@ void Mesh::draw(){
 
     //}
     //glEnd();
-
-	//GLfloat vv[6] = { 0, 0, 100, 200, 200, 0 };
 
 	glBegin(GL_TRIANGLES);
 
@@ -304,6 +307,10 @@ void Mesh::draw(){
 	}
 	glEnd();
 }
+
+/************************************************************
+* Fonctions draw boss
+************************************************************/
 void Mesh::drawBoss(){
 	//glBegin(GL_TRIANGLES);
 
@@ -322,8 +329,6 @@ void Mesh::drawBoss(){
 	//	glEnd();
 	//}
 	//glEnd();
-
-	//GLfloat vv[6] = { 0, 0, 100, 200, 200, 0 };
 
 	std::vector<Vec3Df> & colors = lighting;
 
@@ -356,7 +361,9 @@ void Mesh::drawBoss(){
 	glEnd();
 }
 
-
+/************************************************************
+* Fonctions load boss from .obj file
+************************************************************/
 bool Mesh::loadBoss(const char * filename){
 	FILE* file;
 
@@ -375,8 +382,6 @@ bool Mesh::loadBoss(const char * filename){
 	std::vector<Vec3Df> temp_normals;
 	std::vector<Vec3Df> vertexIndices, uvIndices, normalIndices;
 
-	std::vector<int> vhandles;
-
 	while (1){
 
 		char lineHeader[128];
@@ -392,7 +397,6 @@ bool Mesh::loadBoss(const char * filename){
 		float x, y, z;
 		// else : parse lineHeader
 		if (strcmp(lineHeader, "v") == 0){
-			//glm::vec3 vertex;
 #ifdef WIN32
 			fscanf_s(file, "%f %f %fn", &x, &y, &z);
 #else
@@ -401,7 +405,6 @@ bool Mesh::loadBoss(const char * filename){
 			temp_vertices.push_back(Vec3Df(x, y, z));
 		}
 		else if (strcmp(lineHeader, "vt") == 0){
-			//glm::vec2 uv;
 #ifdef WIN32
 			fscanf_s(file, "%f %fn", &x, &y);
 #else
@@ -430,9 +433,6 @@ bool Mesh::loadBoss(const char * filename){
 				return false;
 			}
 
-			vhandles.push_back(vertexIndex[0] - 1);
-			vhandles.push_back(vertexIndex[1] - 1);
-			vhandles.push_back(vertexIndex[2] - 1);
 			vertexIndices.push_back(Vec3Df(vertexIndex[0], vertexIndex[1], vertexIndex[2]));
 			uvIndices.push_back(Vec3Df(uvIndex[0], uvIndex[1], uvIndex[2]));
 			normalIndices.push_back(Vec3Df(normalIndex[0], normalIndex[1], normalIndex[2]));
@@ -465,40 +465,6 @@ bool Mesh::loadBoss(const char * filename){
 		}
 	}
 
-	//for (unsigned int i = 0; i < normalIndices.size(); i += 3)
-	//{
-	//	for (int j = 0; j < 3; j++)
-	//	{
-	//		unsigned int normalIndex = normalIndices[i][j];
-	//		//vertices.push_back(temp_vertices[vertexIndex - 1]);
-	//		vertices[i].n = temp_normals[normalIndex - 1];
-	//	}
-	//}
-
-	//if (vhandles.size()>3)
-	//{
-	//	//model is not triangulated, so let us do this on the fly...
-	//	//to have a more uniform mesh, we add randomization
-	//	/*unsigned int k = (false) ? (rand() % vhandles.size()) : 0;
-	//	for (unsigned int i = 0; i<vhandles.size() - 2; ++i)
-	//	{
-	//		triangles.push_back(Triangle(vhandles[(k + 0) % vhandles.size()], vhandles[(k + i + 1) % vhandles.size()], vhandles[(k + i + 2) % vhandles.size()]));
-	//	}*/
-
-	//	for (unsigned int i = 0; i<vhandles.size() - 2; ++i)
-	//	{
-	//		triangles.push_back(Triangle(vhandles[i], vhandles[i+1], vhandles[i+2]));
-	//	}
-	//}
-	//else if (vhandles.size() == 3)
-	//{
-	//	triangles.push_back(Triangle(vhandles[0], vhandles[1], vhandles[2]));
-	//}
-	//else
-	//{
-	//	printf("TriMesh::LOAD: Unexpected number of face vertices (<3). Ignoring face");
-	//}
-
 	computeVertexNormals();
 	lighting.resize(vertices.size());
 
@@ -506,7 +472,7 @@ bool Mesh::loadBoss(const char * filename){
 }
 
 /************************************************************
- * Fonctions de chargement du maillage
+ * Fonctions load mesh from .obj file
  ************************************************************/
 bool Mesh::loadMesh(const char * filename)
 {
@@ -642,15 +608,11 @@ bool Mesh::loadMesh(const char * filename)
     return true;
 }
 
-
+/************************************************************
+* Fonctions load terrain
+************************************************************/
 bool Mesh::loadMesh(int NbVertX, int NbVertY, float qurdSize){
-	//int NbVertX = 7, NbVertY = 3;
-	//vertices
 	std::vector<float> SurfaceVertices3f;
-	//colors
-	//std::vector<float> SurfaceColors3f;
-
-	//triangle indices (three successive entries: n1, n2, n3 represent a triangle, each n* is an index representing a vertex.)
 	std::vector<unsigned int> SurfaceTriangles3ui;
 
 	//vertices with 3 coordinates
@@ -659,10 +621,6 @@ bool Mesh::loadMesh(int NbVertX, int NbVertY, float qurdSize){
 	texcords2f.resize(2 * NbVertX * NbVertY);
 	//triangles (2 per default)
 	SurfaceTriangles3ui.resize(3 * (NbVertX - 1) * (NbVertY - 1) * 2);
-	//per vertex colors 
-	//SurfaceColors3f.resize(3 * NbVertX * NbVertY);
-
-	//float qurdSize = 1;
 	
 	int ind1 = 0;
 	int ind2 = 0;
@@ -671,21 +629,11 @@ bool Mesh::loadMesh(int NbVertX, int NbVertY, float qurdSize){
 	float z;
 	float x;
 	float y;
-	//float z;
 
 	for (int i = 0; i < NbVertY; i++)
 	{
 		for (int j = 0; j < NbVertX; j++)
 		{
-
-			//float z = sin(j)*sin(i);
-			/*z = sin(j);
-			if (j == NbVertX - 1 || j == 0)
-			{
-				z = 0;
-			}
-			z *= qurdSize;
-			z -= 2;*/
 			if (j == 0 || j == NbVertX - 1 || i == 0 || i == NbVertY - 1)
 			{
 				z = -i*qurdSize;
@@ -726,25 +674,6 @@ bool Mesh::loadMesh(int NbVertX, int NbVertY, float qurdSize){
 			texcords2f[ind2] = y;
 			ind2++;
 
-			/*if (z > 0.5)
-			{
-				SurfaceColors3f[ind1 - 3] = 1;
-				SurfaceColors3f[ind1 - 2] = 1;
-				SurfaceColors3f[ind1 - 1] = 1;
-			}
-			else if (z < -0.5)
-			{
-				SurfaceColors3f[ind1 - 3] = 0;
-				SurfaceColors3f[ind1 - 2] = 1;
-				SurfaceColors3f[ind1 - 1] = 0;
-			}
-			else
-			{
-				SurfaceColors3f[ind1 - 3] = (z + 1) / 2;
-				SurfaceColors3f[ind1 - 2] = 1;
-				SurfaceColors3f[ind1 - 1] = (z + 1) / 2;
-			}*/
-
 
 			if (i < NbVertY - 1 && j < NbVertX - 1)
 			{
@@ -783,18 +712,11 @@ bool Mesh::loadMesh(int NbVertX, int NbVertY, float qurdSize){
 	return true;
 }
 
+/************************************************************
+* Fonctions load road
+************************************************************/
 void Mesh::loadRoad(int NbVertX, int NbVertY, float qurdSizeX, float qurdSizeY){
-	//cout << qurdSizeX << endl;
-	//cout << qurdSizeY << endl;
-
-	//int NbVertX = 7, NbVertY = 2;
-	//float qurdSize = 1;
-	//vertices
 	std::vector<float> SurfaceVertices3f;
-	//colors
-	//std::vector<float> SurfaceColors3f;
-
-	//triangle indices (three successive entries: n1, n2, n3 represent a triangle, each n* is an index representing a vertex.)
 	std::vector<unsigned int> SurfaceTriangles3ui;
 
 	//vertices with 3 coordinates
@@ -803,10 +725,7 @@ void Mesh::loadRoad(int NbVertX, int NbVertY, float qurdSizeX, float qurdSizeY){
 	texcords2f.resize(2 * NbVertX * NbVertY);
 	//triangles (2 per default)
 	SurfaceTriangles3ui.resize(3 * (NbVertX - 1) * (NbVertY - 1) * 2);
-	//per vertex colors 
-	//SurfaceColors3f.resize(3 * NbVertX * NbVertY);
 
-	//float qurdSize = 1;
 	float z = 0;
 	int ind1 = 0;
 	int ind2 = 0;
@@ -841,10 +760,6 @@ void Mesh::loadRoad(int NbVertX, int NbVertY, float qurdSizeX, float qurdSizeY){
 			{
 				SurfaceTriangles3ui[ind3] = j + i*NbVertX;
 				ind3++;
-				/*SurfaceTriangles3ui[ind3] = j + 1 + i*NbVertX;
-				ind3++;
-				SurfaceTriangles3ui[ind3] = j + (i + 1)*NbVertX;
-				ind3++;*/
 
 				SurfaceTriangles3ui[ind3] = j + (i + 1)*NbVertX;
 				ind3++;
@@ -853,10 +768,6 @@ void Mesh::loadRoad(int NbVertX, int NbVertY, float qurdSizeX, float qurdSizeY){
 
 				SurfaceTriangles3ui[ind3] = j + (i + 1)*NbVertX;
 				ind3++;
-				/*SurfaceTriangles3ui[ind3] = j + 1 + i*NbVertX;
-				ind3++;
-				SurfaceTriangles3ui[ind3] = j + 1 + (i + 1)*NbVertX;
-				ind3++;*/
 
 				SurfaceTriangles3ui[ind3] = j + 1 + (i + 1)*NbVertX;
 				ind3++;
@@ -883,13 +794,17 @@ void Mesh::loadRoad(int NbVertX, int NbVertY, float qurdSizeX, float qurdSizeY){
 
 }
 
+/************************************************************
+* Fonctions draw normals
+* For testing
+************************************************************/
 void Mesh::drawNormals()
 {
 	for (int i = 0; i < vertices.size(); i ++)
 	{
 		glBegin(GL_LINES);
 		glPushMatrix();
-		glColor3f(1, 0, 0);
+		glColor3f(0, 1, 0);
 		//glTranslatef(SurfaceVertices3f[i], SurfaceVertices3f[i+1], SurfaceVertices3f[i+2]);
 		glVertex3f(vertices[i].p[0], vertices[i].p[1], vertices[i].p[2]);
 		glVertex3f(vertices[i].p[0] + vertices[i].n[0], vertices[i].p[1] + vertices[i].n[1], vertices[i].p[2] + vertices[i].n[2]);
@@ -898,33 +813,10 @@ void Mesh::drawNormals()
 	}
 }
 
-void Mesh::drawSomeP(float* mv)
-{
-	int interval = vertices.size() / 10;
-	for (int i = 0; i < vertices.size(); i+=interval)
-	{
-		glBegin(GL_LINES);
-		
-		glColor3f(1, 1, 0);
-		//glTranslatef(SurfaceVertices3f[i], SurfaceVertices3f[i+1], SurfaceVertices3f[i+2]);
-		glVertex3f(0, 0, 0);
-		float xp = mv[0] * vertices[i].p[0] + mv[4] * vertices[i].p[1] + mv[8] * vertices[i].p[2] + mv[12];
-		float yp = mv[1] * vertices[i].p[0] + mv[5] * vertices[i].p[1] + mv[9] * vertices[i].p[2] + mv[13];
-		float zp = mv[2] * vertices[i].p[0] + mv[6] * vertices[i].p[1] + mv[10] * vertices[i].p[2] + mv[14];
-		float wp = mv[3] * vertices[i].p[0] + mv[7] * vertices[i].p[1] + mv[11] * vertices[i].p[2] + mv[15];
-
-		xp /= wp;
-		yp /= wp;
-		zp /= wp;
-
-		cout << xp << endl;
-
-		glVertex3f(xp,yp,zp);
-		
-		glEnd();
-	}
-}
-
+/************************************************************
+* Fonctions draw some points of the mesh
+* For testing
+************************************************************/
 void Mesh::drawSomeP()
 {
 	int interval = vertices.size() / 2;
@@ -945,20 +837,23 @@ void Mesh::drawSomeP()
 	}
 }
 
+/************************************************************
+* Fonctions clip
+* Used in the compute lighting
+************************************************************/
 template <typename T>
 T clip(const T& n, const T& lower, const T& upper) {
 	return std::max(lower, std::min(n, upper));
 }
 
+/************************************************************
+* Fonctions compute lighting
+************************************************************/
 Vec3Df Mesh::computeLighting(Vec3Df vertexPos, Vec3Df normal, Light l, Vec3Df CamPos, Mode mode)
 {
-	//cout << CamPos << endl;
-
 	Vec3Df MaterialDiffuseColor = Vec3Df(1, 1, 1);
-	Vec3Df MaterialAmbientColor = 0.05 * MaterialDiffuseColor;
+	Vec3Df MaterialAmbientColor = 0 * MaterialDiffuseColor;
 
-	//do not change any global variables here! This function will be called for EACH vertex 
-	//of the mesh, so your change would happen several times
 	switch (mode)
 	{
 	case ORIGINAL_LIGHTING:

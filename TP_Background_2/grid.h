@@ -9,22 +9,6 @@
 typedef std::map<unsigned, std::vector<unsigned int> > CellContent;
 typedef std::map<unsigned, Vertex> RepresentantList;
 
-//The above structures can be used almost like a vector!
-//The differenc is that they are sparse. This means: each entry will only exist ONCE in memory and 
-//only after it has been used. Further, the index to do the lookup does not have to be an int... 
-//only, in the above case, unsigned int was used, so you can actually think about the above structures as an 
-//std::vector<unsigned int> and a std::vector<Vertex>
-
-//One big difference occurs when iterating over all elements:
-//std::map<unsigned int, unsigned int> t;
-//t[2]=3;
-//t[3]=5;
-//for (std::map<unsigned int, unsigned int>::iterator iter=t.begin; iter!=t.end();++iter)
-//{
-// std::cout<< "t["<<iter->first<<"]<<"="<<iter->second<<endl;
-//}
-//empty elements will be left out
-
 class Grid
 {
 public:

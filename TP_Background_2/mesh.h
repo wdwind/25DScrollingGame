@@ -6,7 +6,7 @@
 #include "light.h"
 
 /************************************************************
- * Class de triangle de base
+ * Class triangle
  ************************************************************/
 class Triangle {
 public:
@@ -36,7 +36,7 @@ public:
 enum Mode{ ORIGINAL_LIGHTING = 0, DIFFUSE_LIGHTING, SPECULAR_LIGHTING, COMBINED_LIGHTING, TOON_LIGHTING };
 
 /************************************************************
- * Class de maillage basique
+ * Class Mesh
  ************************************************************/
 class Mesh {
 public:
@@ -46,10 +46,14 @@ public:
     std::vector<Triangle> triangles;
 	std::vector<float> texcords2f;
 
+	// Load mesh from .obj file
     bool loadMesh(const char * filename);
 	bool loadBoss(const char * filename);
+
+	// Load mesh by constructing terrains
 	bool loadMesh(int NbVertX = 7, int NbVertY = 3, float qurdSize = 1);
 	void loadRoad(int NbVertX = 7, int NbVertY = 3, float qurdSizeX = 1, float qurdSizeY = 1);
+
     void computeVertexNormals ();
     void centerAndScaleToUnit ();
     void draw();
@@ -58,17 +62,11 @@ public:
 	void drawWithColors(const std::vector<Vec3Df> & colors);
 	void drawWithColors();
 	void drawNormals();
-	void drawSomeP(float* mv);
+	//id drawSomeP(float* mv);
 	void drawSomeP();
     void computeBoundingCube();
-	int getClosestVertexIndex(const Vec3Df & origin, const Vec3Df & direction);
+	//t getClosestVertexIndex(const Vec3Df & origin, const Vec3Df & direction);
 	static Vec3Df computeLighting(Vec3Df vertexPos, Vec3Df normal, Light light, Vec3Df CamPos, Mode mode);
-
-	//void setLighting(std::vector<Vec3Df> & l) { lighting = l;};
-	//void setTranslate(Vec3Df t) { translate = t; };
-	//
-	//std::vector<Vec3Df> & getLighting() { return lighting;}
-	//Vec3Df getTranslate() { return translate; }
 
     //Bounding box information
     Vec3Df bbOrigin;
@@ -76,6 +74,8 @@ public:
 
 	std::vector<Vec3Df> lighting;
 	Vec3Df translate = Vec3Df(0, 0, 0);
+
+	std::vector<unsigned int> shadow;
 };
 
 #endif // MESH_H

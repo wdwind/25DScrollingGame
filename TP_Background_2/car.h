@@ -1,8 +1,3 @@
-/** \file car.h
-
-Draw car.
-
-*/
 #ifndef CAR
 #define CAR
 
@@ -14,9 +9,9 @@ Draw car.
 #include "bullet.h"
 #include "texture.h"
 
-//static const float mf[] = { (float)0.03, (float)0.1, (float)0.23 };
-//std::vector<float> PositionBullet(mf, mf + sizeof(mf) / sizeof(float));
-
+/************************************************************
+* Class Car
+************************************************************/
 class Car{
 public:
 	Car(){
@@ -39,30 +34,28 @@ public:
 		translate = defaultT;
 	};
 
+	// Translation
 	Vec3Df translate = Vec3Df(0, 0, 0);
 
+	// Sphere, used in draw wheel
 	GLUquadricObj *sphere = NULL;
 
+	// Rotation angles of the cannon and wheel
 	GLfloat rCanon = 0.0f;
 	GLfloat rBall = 0.0f;
-
-	std::vector<float> PositionBullet;
-	 //= { (float)0.03, (float)0.1, (float)0.23 };
-	//PositionBullet.push_back(1);
-
-	//Bullet temp1 = Bullet();
-
-	std::vector<Bullet> bullets;
-	
-	//GLfloat firstVertexOfTri = 0.0;
-	//GLfloat incrementOfVertex = .001;
-	
-	//GLfloat angleUpper = 0;
-	//GLfloat angleFore = -30;
-	//GLfloat angleHand = -30;
-	//GLfloat incrementAngle = .05;
+	// Speed of the rotation of the wheel
 	GLfloat incrementOfrball = 2.8f;
 
+	std::vector<float> PositionBullet;
+
+	// Bullets
+	std::vector<Bullet> bullets;
+	
+	bool debugInCar = false;
+
+	/************************************************************
+	* Fonctions draw wheel
+	************************************************************/
 	void drawBall(void) {
 		float ballX = 0.1f;
 		float ballY = 0.1f;
@@ -71,42 +64,41 @@ public:
 		glColor3f(1.0, 1.0, 1.0); //set ball colour
 
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, Texture[4]);
+		glBindTexture(GL_TEXTURE_2D, Texture[wheelTex]);
 
 		glPushMatrix();
-			glTranslatef(ballX, ballY, ballZ); //moving it toward the screen a bit on creation
+			glTranslatef(ballX, ballY, ballZ);
 			glRotatef(rBall, 0, 0, -1);
-			gluSphere(sphere, .2, 10, 10); //create ball.
+			gluSphere(sphere, .2, 10, 10); 
 		glPopMatrix();
 
 		glPushMatrix();
-			glTranslatef(ballX + .8, ballY, ballZ); //moving it toward the screen a bit on creation
+			glTranslatef(ballX + .8, ballY, ballZ);
 			glRotatef(rBall, 0, 0, -1);
-			gluSphere(sphere, .2, 10, 10); //
+			gluSphere(sphere, .2, 10, 10); 
 		glPopMatrix();
 
 		glPushMatrix();
-			glTranslatef(ballX, ballY, ballZ + .5); //moving it toward the screen a bit on creation
+			glTranslatef(ballX, ballY, ballZ + .5);
 			glRotatef(rBall, 0, 0, -1);
-			gluSphere(sphere, .2, 10, 10); //
+			gluSphere(sphere, .2, 10, 10); 
 		glPopMatrix();
 
 		glPushMatrix();
-			glTranslatef(ballX + .8, ballY, ballZ + .5); //moving it toward the screen a bit on creation
+			glTranslatef(ballX + .8, ballY, ballZ + .5); 
 			glRotatef(rBall, 0, 0, -1);
-			gluSphere(sphere, .2, 10, 10); //
+			gluSphere(sphere, .2, 10, 10); 
 		glPopMatrix();
 
 		glBindTexture(GL_TEXTURE_2D, 2);
 		glDisable(GL_TEXTURE_2D);
 	}
 
+	/************************************************************
+	* Fonctions draw face
+	************************************************************/
 	void drawUnitFace()
 	{
-		//1) draw a unit quad in the x,y plane oriented along the z axis
-		//2) make sure the orientation of the vertices is positive (counterclock wise)
-		//3) What happens if the order is inversed?
-		//glColor3f(1, 1, 0);
 		glNormal3f(0, 0, -1);
 
 		glBegin(GL_QUADS);
@@ -122,14 +114,11 @@ public:
 
 	}
 
+	/************************************************************
+	* Fonctions draw unit cube
+	************************************************************/
 	void drawUnitCube()
 	{
-		//1) draw a cube using your function drawUnitFace
-		//rely on glTranslate, glRotate, glPushMatrix, and glPopMatrix
-		//the latter two influence the model matrix, as seen during the course.
-		//glPushMatrix stores the current matrix and puts a copy on
-		//the top of a stack.
-		//glPopMatrix pops the top matrix on the stack
 		glPushMatrix();
 			drawUnitFace();
 			glRotatef(180, 0, -1, 0);
@@ -162,16 +151,9 @@ public:
 		glPopMatrix();
 	}
 
-	//void drawBullet(){
-	//	glColor3f(0, 0, 1);
-
-	//	glPushMatrix();
-	//		glRotatef(rCanon, 0, 0, -1);
-	//		glTranslatef(PositionBullet[0], PositionBullet[1], PositionBullet[2]);
-	//		glutSolidSphere(.05, 50, 50);
-	//	glPopMatrix();
-	//}
-
+	/************************************************************
+	* Fonctions update the translation of the car to the bullets
+	************************************************************/
 	void updateBullets(){
 		for (int i = 0; i < bullets.size(); i++)
 		{
@@ -184,6 +166,9 @@ public:
 		}
 	}
 
+	/************************************************************
+	* Fonctions shot bullet
+	************************************************************/
 	void shotBullet(){
 		if (bullets.empty())
 		{
@@ -192,8 +177,6 @@ public:
 			bullets.back().theta = rCanon;
 			bullets.back().translate = translate;
 		}
-
-		//updateBullets();
 
 		//bullets.end()->speed = 0.05;
 		bullets.back().origin = Vec3Df(PositionBullet[0] + 0.5, PositionBullet[1] + 0.5, PositionBullet[2] + 0.5);
@@ -209,6 +192,9 @@ public:
 		bullets.back().drawBullet();
 	}
 
+	/************************************************************
+	* Fonctions draw bullet
+	************************************************************/
 	void drawBullet2(){
 		if (bullets.empty())
 		{
@@ -218,7 +204,6 @@ public:
 			bullets.back().theta = rCanon;
 		}
 
-		//bullets.back().drawBullet();
 		updateBullets();
 
 		for (int i = 0; i < bullets.size(); i++)
@@ -234,10 +219,17 @@ public:
 			}
 
 			bullets[i].drawBullet();
-			//bullets[i].drawCurrentPos();
+
+			if (debugInCar)
+			{
+				bullets[i].drawCurrentPos();
+			}
 		}
 	}
 
+	/************************************************************
+	* Fonctions draw car
+	************************************************************/
 	void drawCar()
 	{
 		drawBullet2();
@@ -246,7 +238,7 @@ public:
 			glColor3f(1, 1, 1);
 
 			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, Texture[23]);
+			glBindTexture(GL_TEXTURE_2D, Texture[carBodyTex]);
 
 			glScalef(2, 1, 1);
 			drawUnitCube();
@@ -257,18 +249,11 @@ public:
 		glPushMatrix(); //draw the canon
 			glTranslatef(0.5, 0.5, 0.45);
 
-		//temp1.rotate = Vec3Df(0, 0, -1);
-		//temp1.translate = Vec3Df(PositionBullet[0], PositionBullet[1], PositionBullet[2]);
-		//temp1.theta = rCanon;
-
-		//drawBullet2();
-			
 			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, Texture[20]);
+			glBindTexture(GL_TEXTURE_2D, Texture[cannonTex]);
 
 			glRotatef(rCanon, 0, 0, -1); //control the canon
 			glScalef(1.2, 0.4, 0.4);
-			//glNormal3f(1, 2, 0);
 			drawUnitCube();
 
 			glBindTexture(GL_TEXTURE_2D, 2);
@@ -292,13 +277,6 @@ public:
 		}
 	}
 
-	//void drawEnemy(){
-	//	glPushMatrix();
-	//	glTranslatef(3, 0, 0);
-	//	glScalef(2, 2, 2);
-	//	drawUnitFace();
-	//	glPopMatrix();
-	//}
 };
 
 

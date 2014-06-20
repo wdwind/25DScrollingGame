@@ -33,9 +33,6 @@
     <ClInclude Include="traqueboule.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Triangle.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Vec3D.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -168,9 +165,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="DavidHeadCleanMax.obj">
-      <Filter>资源文件</Filter>
-    </Image>
     <Image Include="enemy.obj">
       <Filter>资源文件</Filter>
     </Image>

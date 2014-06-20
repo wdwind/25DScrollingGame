@@ -8,34 +8,43 @@
 
 #define PI 3.14159265
 
+/************************************************************
+* Fonctions bullet
+************************************************************/
 class Bullet {
 public:
 	Bullet() {
-		//initTexture();
 	};
 	Bullet(Vec3Df o){
 		origin = o;
-		//initTexture();
-		//drawBullet();
 	}
 
-	// Starting position corresponding to the absolute coordinate system
+	// Starting position
 	Vec3Df origin = Vec3Df(0, 0, 0);
 
-	// Translation corresponding to the starting position
+	// Translation and the translation when shot
 	Vec3Df translate = Vec3Df(0, 0, 0);
 	Vec3Df translateWhenShot = Vec3Df(0, 0, 0);
 
-	// Rotation corresponding to the starting position
+	// Rotation direction and angle of the cannon (which is also the rotation of the bullet 
 	Vec3Df rotate = Vec3Df(0, 0, -1);
 	float theta = 0;
 
+	// Speed of the bullet
 	float speedX = 0;
+
+	// Used to determine if the bullet is out of the screen
 	bool outOfRange = false;
+
+	// Used to determine if the bullet is shot
 	bool shot = false;
 
+	// The index of the texture
 	int texInd = 0;
 
+	/************************************************************
+	* Fonctions draw bullet
+	************************************************************/
 	void drawBullet(){
 		GLUquadricObj *sphere = NULL;
 		sphere = gluNewQuadric();
@@ -53,8 +62,7 @@ public:
 		glBindTexture(GL_TEXTURE_2D, Texture[texInd]);
 		glColor3f(1, 1, 1);
 		glPushMatrix();
-			//cout << theta << endl;
-			
+
 			glTranslatef(origin[0], origin[1], origin[2]);
 
 			if (shot)
@@ -76,7 +84,6 @@ public:
 				}
 			}
 
-			
 			//glTranslatef(0, 0, .23);
 			gluSphere(sphere, .1, 20, 20);
 		glPopMatrix();
@@ -85,6 +92,11 @@ public:
 		glDisable(GL_TEXTURE_2D);
 	}
 
+	/************************************************************
+	* Fonctions get current position
+	* Get the current position of the bullet
+	* Used in testing
+	************************************************************/
 	Vec3Df getCurrentPos(){
 		Vec3Df cp = origin;
 		if (shot)
@@ -102,6 +114,11 @@ public:
 		return cp;
 	}
 
+	/************************************************************
+	* Fonctions draw current position
+	* Draw the current position of the bullet
+	* Used in testing
+	************************************************************/
 	void drawCurrentPos(){
 		glBegin(GL_LINES);
 
@@ -112,7 +129,6 @@ public:
 
 		glEnd();
 
-		//cout << cp[0] << " " << cp[1] << " " << cp[2] << endl;
 	}
 
 };

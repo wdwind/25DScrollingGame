@@ -16,18 +16,33 @@ void printVector(float* v, int num){
 unsigned int W_fen = 1200;  // largeur fenetre
 unsigned int H_fen = 800;  // hauteur fenetre
 
-// meshes and enemies
+// meshes (terrain, and road)
 std::vector<Mesh> meshes;
+// Parameters of roads and mountains!!!
+int NbVertX = 13;
+int NbVertY = 5;
+float qurdSize = 1;
+float Vx1 = -5;
+float Vx2 = (NbVertX - 1)*qurdSize + Vx1;
+float threshold = -16.5;
+float backgroundSpeed = 0.01;
 
+
+// Car
 Vec3Df defaultCarTrans = Vec3Df(-1.5, 0, 0);
 Car car = Car(defaultCarTrans);
-bool carMove = false;
-bool drawC = true;
+//bool carMove = false;
+bool drawCar = true;
+bool shot = false;
+float time1 = 0;
+bool jump = false;
 
+// Boss
 Enemy Boss;
 int boss = 0;
 Vec3Df bossStartPos = Vec3Df(3, 1, 1);
 
+// Small enemies
 std::vector<Enemy> enemies;
 int destroyedE = 0;
 Vec3Df enemyStartPos = Vec3Df(3, 0.5, 1);
@@ -41,12 +56,16 @@ float BackgroundColor[] = { 0, 0, 0 };
 
 // Different display modes
 // enum Mode{ ORIGINAL_LIGHTING=0, DIFFUSE_LIGHTING, SPECULAR_LIGHTING, COMBINED_LIGHTING, TOON_LIGHTING};
-//Currently active mode
+// Currently active mode uses Phong model
 Mode mode = COMBINED_LIGHTING;
 
-//if the program runs too slow, change this to false.
-//to compute a result, you then need to press 'u'
+// If the program runs too slow, change this to false.
+// to compute a result, you then need to press 'u'
 bool updateAlways = true;
+
+// Select if showing the shades or not
+bool shading = false;
+std::vector<Vec3Df> shadeLine;
 
 // Light
 std::vector<Vec3Df> LightPos;
@@ -60,56 +79,13 @@ float s = 5;
 Light light;
 
 
-//The position of the camera
-//this variable will be updated by the program! Do not change it manually!
-//Of course, you can USE its value
-Vec3Df CamPos;// = Vec3Df(0.0f, 0.0f, -4.0f);
-
-//The index of the chosen vertex is stored in this variable
-//the value is -1 if no vertex is chosen
-//to choose a vertex, hover over it and press space
-//int SelectedVertex = -1;
-
-//per vertex attributes, useful for materials - see later exercises
-//std::vector<Vec3Df> MeshMaterial;
-
-// Texture
-int texTerrain = 4;
-int texRoad1 = 5;
-int texRoad2 = 6;
-int texSky = 0;
-int texSun = 0;
+// The position of the camera
+Vec3Df CamPos;
 
 
-// Roads and mountains!!!
-int NbVertX = 13;
-int NbVertY = 5;
-float qurdSize = 1;
+// Debug
+bool debug = false;
 
-float Vx1 = -5;
-float Vx2 = (NbVertX - 1)*qurdSize + Vx1;
-float threshold = -16.5;
-
-float backgroundSpeed = 0.01;
-
-
-
-
-
-bool drawN = false;
-
-
-
-bool shot = false;
-bool temp1 = false;
-bool temp2 = false;
-
-
-bool drawB = false;
-
-
-
-float time1 = 0;
-bool jump = false;
+//bool drawN = false;
 
 #endif

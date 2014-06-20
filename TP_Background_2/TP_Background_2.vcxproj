@@ -90,7 +90,6 @@
     <ClInclude Include="move.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="traqueboule.h" />
-    <ClInclude Include="Triangle.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="Vec3D.h" />
     <ClInclude Include="Vertex.h" />
@@ -131,11 +130,6 @@
     <None Include="textureTerrainX.ppm" />
     <None Include="textureWheel01X.ppm" />
     <None Include="textureWheel02X.ppm" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="DavidHeadCleanMax.obj">
-      <FileType>Document</FileType>
-    </Image>
   </ItemGroup>
   <ItemGroup>
     <Image Include="enemy.obj">

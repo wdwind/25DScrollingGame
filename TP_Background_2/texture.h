@@ -10,22 +10,21 @@ int showText = 14;
 int temp = showText;
 int maxTex = 25;
 
+int sunTex = 2;
+int bossBackgroundTex = 1;
+int distantBackgroundTex = 11;
+int terrainTex = 14;
+int roadTex = 8;
+int bossTex = 17;
+int wheelTex = 4;
+int carBodyTex = 23;
+int cannonTex = 20;
+
 //this function loads the textures in the GPU memory
 //the function is called once when the program starts
 void initTexture()
 {
-	//Mmm... you understood the mechanism of moving the checkerboard, but can you produce something else?
-	//1) load more textures using the file "brick.ppm" and put it in Texture[1], then "sand.ppm" and put it in Texture[2]
-	//	btw. the wise Imp named Gerold, or short "Gimp" (it is actually a software), knows how to write PPM files (P6 - colored images)
-	//  Hence, you can convert any image into a file that you can then use as a texture, but first stick to the given ones...
-	//3) To make use of these textures, you first need a magic wand from the village (function) display().
-	//	But be careful my young apprentice, you will need to traverse a desert...
-
 	Texture.resize(maxTex);
-	Texture[0] = 0;
-	Texture[1] = 0;
-	Texture[2] = 0;
-	Texture[3] = 0;
 
 	PPMImage image("checker.ppm");
 	glGenTextures(1, &Texture[0]);

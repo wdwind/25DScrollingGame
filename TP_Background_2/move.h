@@ -32,36 +32,34 @@
 #include "Vec3D.h"
 #include <vector>
 
-
 #define SMALL_NUM   0.00000001 // anything that avoids division overflow
+
 // dot product (3D) which allows vector operations in arguments
 #define dot(u,v)   ((u).x * (v).x + (u).y * (v).y + (u).z * (v).z)
 
 class RealTriangle {
 public:
-	//inline RealTriangle() {
-	//	v[0] = v[1] = v[2] = 0;
-	//}
-	inline RealTriangle(const RealTriangle & t) {
-		v.push_back(t.v[0]);
-		v.push_back(t.v[1]);
-		v.push_back(t.v[2]);
+	inline RealTriangle(){
+		//v.resize(3);
 	}
-	inline RealTriangle(Vec3Df v0, Vec3Df v1, Vec3Df v2) {
+
+	inline virtual ~RealTriangle() {}
+	inline RealTriangle & operator= (const RealTriangle & t) {
+		//v.resize(3);
+		/*v.push_back(t.v[0]);
+		v.push_back(t.v[1]);
+		v.push_back(t.v[2]);*/
+		return (*this);
+	}
+
+	std::vector<Vec3Df> v;
+
+	void set(const Vec3Df v0, const Vec3Df v1, const Vec3Df v2)
+	{
 		v.push_back(v0);
 		v.push_back(v1);
 		v.push_back(v2);
 	}
-	inline virtual ~RealTriangle() {}
-	inline RealTriangle & operator= (const RealTriangle & t) {
-		v.push_back(t.v[0]);
-		v.push_back(t.v[1]);
-		v.push_back(t.v[2]);
-		return (*this);
-	}
-
-	//unsigned int v[3];
-	std::vector<Vec3Df> v;
 };
 
 
