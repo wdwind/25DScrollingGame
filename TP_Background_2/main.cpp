@@ -1,3 +1,13 @@
+/******************************************************
+* 2.5D Shooter Game
+*
+* By
+* Feng Wang 4325184
+* Xiaopeng Li 4319923
+* Shuheng Shen 4298225
+*
+*/
+
 #ifdef WIN32
 #include <Windows.h>
 #endif
